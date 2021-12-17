@@ -64,27 +64,27 @@ export type FindPossibleDependencyKeys<
     ];
 
 export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = {}> = {
-  readonly [FeatureKey in keyof TFeatureParams]: MapToDependencies<
-    TFeatureParams,
-    ExtractDependencyKeys<TFeatureParams[FeatureKey]>
-  > extends Parameters<TFeatureParams[FeatureKey][0]>
-    ? TFeatureParams[FeatureKey]
+  readonly [FeatureKey in keyof TFeatureParams]: ExtractDependencyKeys<TFeatureParams[FeatureKey]> extends (
+    | keyof TFeatureParams
+    | BuiltInFeatureKey
+  )[]
+    ? MapToDependencies<TFeatureParams, ExtractDependencyKeys<TFeatureParams[FeatureKey]>> extends Parameters<
+        TFeatureParams[FeatureKey][0]
+      >
+      ? TFeatureParams[FeatureKey]
+      : readonly [
+          TFeatureParams[FeatureKey][0],
+          ...FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
+        ]
     : readonly [
         TFeatureParams[FeatureKey][0],
         ...FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
       ];
 };
 
-export const createFeaturesContext = <
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [
-      (...deps: any[]) => any,
-      ...(keyof TFeatureParams | BuiltInFeatureKey)[]
-    ];
-  }
->(
+export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
-) => {
+): React.Context<ConvertToFeatures<TFeatureParams>> => {
   const appliedFeature = {} as ConvertToFeatures<TFeatureParams>;
   const FeaturesContext = React.createContext(appliedFeature);
 
@@ -103,19 +103,14 @@ export const createFeaturesContext = <
 };
 
 export const applyFeaturesContext = <
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [
-      (...deps: any[]) => any,
-      ...(keyof TFeatureParams | BuiltInFeatureKey)[]
-    ];
-  },
+  TFeatureParams extends UnknownFeatureParams,
   TFeature extends (...deps: any) => any
 >(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
   performFeature: TFeature & { displayName?: string },
   dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeature>>
 ) => {
-  const appliedFeature = (...params: any[]) => {
+  const performAppliedFeature = (...params: any[]) => {
     const features = {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       ...useContext(FeaturesContext),
@@ -135,11 +130,11 @@ export const applyFeaturesContext = <
     !/^use/.test(performFeature.displayName || performFeature.name) &&
     ((dependencyKeys as string[]).includes('useRef') || (dependencyKeys as string[]).includes('usePropsWithRef'))
   ) {
-    const refForwardedFeature = React.forwardRef(appliedFeature);
+    const refForwardedFeature = React.forwardRef(performAppliedFeature);
     refForwardedFeature.displayName = performFeature.displayName || performFeature.name;
     return refForwardedFeature;
   }
 
-  appliedFeature.displayName = performFeature.displayName || performFeature.name;
-  return appliedFeature;
+  performAppliedFeature.displayName = performFeature.displayName || performFeature.name;
+  return performAppliedFeature;
 };
