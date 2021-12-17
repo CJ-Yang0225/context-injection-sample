@@ -2,37 +2,29 @@ import React, { useContext } from 'react';
 
 type PrevDependencyIndexes = [-1, 0, 1, 2, 3, 4, 5, 6];
 
+type UnknownFeatureParams = Record<string, readonly [(...deps: any[]) => any, ...any[]]>;
+
 export type BuiltInFeatureKey = keyof BuiltInFeatures;
 
-export type BuiltInFeatures<
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [(...deps: any[]) => any, ...any[]];
-  } = {}
-> = {
+export type BuiltInFeatures<TFeatureParams extends UnknownFeatureParams = {}> = {
   useProps: () => any;
   usePropsWithRef: () => { ref: () => React.Ref<any> };
   useRef: () => React.Ref<any>;
   useFeaturesContext: () => ConvertToFeatures<TFeatureParams>;
 };
 
-export type BuiltInDependencies<
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [(...deps: any[]) => any, ...any[]];
-  } = {}
-> = {
+export type BuiltInDependencies<TFeatureParams extends UnknownFeatureParams = {}> = {
   [FeatureKey in BuiltInFeatureKey]: ReturnType<BuiltInFeatures<TFeatureParams>[FeatureKey]>;
 };
 
-export type MapDependencies<
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [(...deps: any[]) => any, ...any[]];
-  },
+export type MapToDependencies<
+  TFeatureParams extends UnknownFeatureParams,
   TDependencyKeys extends (keyof TFeatureParams | BuiltInFeatureKey)[],
   TDependencyKeyIndex extends number = PrevDependencyIndexes[TDependencyKeys['length']]
 > = TDependencyKeyIndex extends -1
   ? []
   : [
-      ...MapDependencies<TFeatureParams, TDependencyKeys, PrevDependencyIndexes[TDependencyKeyIndex]>,
+      ...MapToDependencies<TFeatureParams, TDependencyKeys, PrevDependencyIndexes[TDependencyKeyIndex]>,
       TDependencyKeys[TDependencyKeyIndex] extends keyof TFeatureParams
         ? ReturnType<TFeatureParams[TDependencyKeys[TDependencyKeyIndex]][0]>
         : TDependencyKeys[TDependencyKeyIndex] extends BuiltInFeatureKey
@@ -40,13 +32,15 @@ export type MapDependencies<
         : any
     ];
 
+export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
+  [FeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[FeatureKey][0]>;
+};
+
 type ExtractDependencyKeys<TFeatureParamsValue extends readonly [(...deps: any[]) => any, ...any[]]> =
   TFeatureParamsValue extends readonly [(...deps: any[]) => any, ...infer IDependencyKeys] ? IDependencyKeys : [];
 
 export type FindPossibleDependencyKeys<
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [(...deps: any[]) => any, ...any[]];
-  },
+  TFeatureParams extends UnknownFeatureParams,
   TDependencies extends any[],
   TDependencyKeyIndex extends number = PrevDependencyIndexes[TDependencies['length']]
 > = TDependencyKeyIndex extends -1
@@ -69,15 +63,16 @@ export type FindPossibleDependencyKeys<
       )
     ];
 
-export type GetFeatureParams<TFeatureContext extends React.Context<ConvertToFeatures<any>>> =
-  TFeatureContext extends React.Context<ConvertToFeatures<infer IFeatureParams>> ? IFeatureParams : any;
-
-export type ConvertToFeatures<
-  TFeatureParams extends {
-    readonly [FeatureKey in keyof TFeatureParams]: readonly [(...deps: any[]) => any, ...any[]];
-  }
-> = {
-  [FeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[FeatureKey][0]>;
+export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = {}> = {
+  readonly [FeatureKey in keyof TFeatureParams]: MapToDependencies<
+    TFeatureParams,
+    ExtractDependencyKeys<TFeatureParams[FeatureKey]>
+  > extends Parameters<TFeatureParams[FeatureKey][0]>
+    ? TFeatureParams[FeatureKey]
+    : readonly [
+        TFeatureParams[FeatureKey][0],
+        ...FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
+      ];
 };
 
 export const createFeaturesContext = <
@@ -87,22 +82,17 @@ export const createFeaturesContext = <
       ...(keyof TFeatureParams | BuiltInFeatureKey)[]
     ];
   }
->(featureParams: {
-  readonly [FeatureKey in keyof TFeatureParams]: MapDependencies<
-    TFeatureParams,
-    ExtractDependencyKeys<TFeatureParams[FeatureKey]>
-  > extends Parameters<TFeatureParams[FeatureKey][0]>
-    ? TFeatureParams[FeatureKey]
-    : readonly [
-        TFeatureParams[FeatureKey][0],
-        ...FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
-      ];
-}) => {
+>(
+  featureParams: RestrictFeatureParams<TFeatureParams>
+) => {
   const appliedFeature = {} as ConvertToFeatures<TFeatureParams>;
   const FeaturesContext = React.createContext(appliedFeature);
 
   for (const featureKey in featureParams) {
-    const [performFeature, ...dependencyKeys] = featureParams[featureKey];
+    const [performFeature, ...dependencyKeys] = featureParams[featureKey] as [
+      TFeatureParams[keyof TFeatureParams][0],
+      ...(keyof TFeatureParams | BuiltInFeatureKey)[]
+    ];
 
     appliedFeature[featureKey] = dependencyKeys.length
       ? (applyFeaturesContext as any)(FeaturesContext, performFeature, dependencyKeys)
