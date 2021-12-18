@@ -88,16 +88,13 @@ export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = 
 export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
 ): React.Context<ConvertToFeatures<TFeatureParams>> => {
-  const appliedFeature = {} as ConvertToFeatures<TFeatureParams>;
-  const FeaturesContext = React.createContext(appliedFeature);
+  const appliedFeatures = {} as ConvertToFeatures<TFeatureParams>;
+  const FeaturesContext = React.createContext(appliedFeatures);
 
   for (const featureKey in featureParams) {
-    const [performFeature, ...dependencyKeys] = featureParams[featureKey] as [
-      FeatureSource,
-      ...DependencyKey<TFeatureParams>[]
-    ];
+    const [performFeature, ...dependencyKeys] = featureParams[featureKey] as TFeatureParams[typeof featureKey];
 
-    appliedFeature[featureKey] = dependencyKeys.length
+    appliedFeatures[featureKey] = dependencyKeys.length
       ? (applyFeaturesContext as any)(FeaturesContext, performFeature, dependencyKeys)
       : performFeature;
   }
@@ -105,13 +102,10 @@ export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParam
   return FeaturesContext;
 };
 
-export const applyFeaturesContext = <
-  TFeatureParams extends UnknownFeatureParams,
-  TFeature extends (...deps: any) => any
->(
+export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
-  performFeature: TFeature & { displayName?: string },
-  dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeature>>
+  performFeature: TFeatureSource & { displayName?: string },
+  dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>
 ) => {
   const performAppliedFeature = (...params: any[]) => {
     const features = {
