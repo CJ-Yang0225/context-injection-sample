@@ -5,7 +5,7 @@ export interface CustomerStore {
   setCustomers: (customers: Customer[] | ((customers: Customer[]) => Customer[])) => void;
 }
 
-const useCustomerStore = () => {
+const useCustomerStore = (): CustomerStore => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   return { customers, setCustomers };
 };
