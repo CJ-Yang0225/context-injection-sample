@@ -122,16 +122,30 @@ export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams
     return performFeature(...dependencies);
   };
 
+  extendComponent(performAppliedFeature, performFeature);
+
   /** @todo 改善 hook 判定或採用其他方式 */
   if (
     !/^use/.test(performFeature.displayName || performFeature.name) &&
     ((dependencyKeys as string[]).includes('useRef') || (dependencyKeys as string[]).includes('usePropsWithRef'))
   ) {
     const refForwardedFeature = React.forwardRef(performAppliedFeature);
-    refForwardedFeature.displayName = performFeature.displayName || performFeature.name;
+    extendComponent(refForwardedFeature, performAppliedFeature);
     return refForwardedFeature;
   }
 
-  performAppliedFeature.displayName = performFeature.displayName || performFeature.name;
   return performAppliedFeature;
 };
+
+/**
+ * 補上額外的靜態屬性，其中將 $$typeof 與 render 排除，避免 react 判斷為其他元件 (如: forward ref) 導致失效。
+ * @param ExtendedComponent
+ * @param Component
+ */
+export function extendComponent(ExtendedComponent: React.ElementType, Component: React.ElementType) {
+  if (typeof Component !== 'string') {
+    const { $$typeof, render, ...staticMembers } = Component as any;
+    Object.assign(ExtendedComponent, staticMembers);
+    (ExtendedComponent as React.ComponentType).displayName = Component.displayName || Component.name;
+  }
+}

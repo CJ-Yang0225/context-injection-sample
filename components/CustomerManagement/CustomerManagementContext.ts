@@ -10,23 +10,20 @@ import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
 import CustomerTable from './CustomerTable';
 import CustomerManagementSection from './CustomerManagementSection';
-import React from 'react';
 
-const CustomerManagementContext = createFeaturesContext({
+const featureParams = {
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
   useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService'],
   CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
   CustomerManagementSection: [CustomerManagementSection, 'useProps', 'useFeaturesContext'],
-});
+} as const;
 
-type CustomerManagementFeatures = typeof CustomerManagementContext extends React.Context<infer Features>
-  ? Features
-  : any;
+const CustomerManagementContext = createFeaturesContext(featureParams);
 
-type CustomerManagementFeatureParams = CustomerManagementFeatures extends ConvertToFeatures<infer FeatureParams>
-  ? FeatureParams
-  : any;
+type CustomerManagementFeatureParams = typeof featureParams;
+
+export type CustomerManagementFeatures = ConvertToFeatures<CustomerManagementFeatureParams>;
 
 export const applyCustomerManagement = <TFeature extends (...deps: any) => any>(
   performFeature: TFeature,
