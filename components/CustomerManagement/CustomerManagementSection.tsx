@@ -7,11 +7,14 @@ export interface CustomerManagementSectionProps {}
 function CustomerManagementSection(props: CustomerManagementSectionProps, features: CustomerManagementFeatures) {
   return (
     <CustomerManagementSectionSelf {...props}>
-      <features.CustomerTable />
+      <features.CustomerTable className="CustomerManagementSection__table" />
     </CustomerManagementSectionSelf>
   );
 }
 
-const CustomerManagementSectionSelf = styled.section``;
+const CustomerManagementSectionSelf = styled.section`
+  .CustomerManagementSection__table {
+  }
+`;
 
 export default CustomerManagementSection;
