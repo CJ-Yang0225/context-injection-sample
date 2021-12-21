@@ -1,22 +1,28 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import {
-  applyCustomerManagement,
-  CustomerManagementFeatures,
-} from '../components/CustomerManagement/CustomerManagementContext';
+import { applyCustomerManagement } from '../components/CustomerManagement/CustomerManagementContext';
 
-export interface CustomerManagementPageProps {}
+export interface CustomerManagementPageProps {
+  Section: React.FC<IntrinsicElementProps<'section'>>;
+  EditPanel: React.FC<IntrinsicElementProps<'div'>>;
+}
 
-function CustomerManagementPage(props: CustomerManagementPageProps, features: CustomerManagementFeatures) {
-  console.log(features);
+function CustomerManagementPage(props: CustomerManagementPageProps) {
+  const { Section, EditPanel, ...domProps } = props;
 
   return (
-    <CustomerManagementPageSelf {...props}>
-      <features.CustomerManagementSection />
+    <CustomerManagementPageSelf {...domProps}>
+      <Section className="CustomerManagementPage__section" />
+      <EditPanel className="CustomerManagementPage__edit-panel" />
     </CustomerManagementPageSelf>
   );
 }
 
 const CustomerManagementPageSelf = styled.div``;
 
-export default applyCustomerManagement(CustomerManagementPage, ['useProps', 'useFeaturesContext']);
+CustomerManagementPage.defaultProps = {
+  Section: (props: IntrinsicElementProps<'section'>) => <section {...props} />,
+  EditPanel: (props: IntrinsicElementProps<'div'>) => <div {...props} />,
+};
+
+export default applyCustomerManagement(CustomerManagementPage, ['solveCustomerManagementPageProps']);

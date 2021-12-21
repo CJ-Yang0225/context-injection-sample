@@ -1,33 +1,30 @@
-import {
-  createFeaturesContext,
-  applyFeaturesContext,
-  ConvertToFeatures,
-  FindPossibleDependencyKey,
-} from '../../utils/framework';
-
+import { createFeaturesContext, applyFeaturesContext, FindPossibleDependencyKey } from '../../utils/framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
 import CustomerTable from './CustomerTable';
 import CustomerManagementSection from './CustomerManagementSection';
 
-const featureParams = {
+const solveSectionProps = (props: any, { CustomerTable }: any) => ({ Table: CustomerTable, ...props });
+
+const solvePageProps = (props: any, { CustomerManagementSection }: any) => ({
+  Section: CustomerManagementSection,
+  ...props,
+});
+
+const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService'],
+  useCustomerTableFeature: [useCustomerTableFeature, 'usePropsWithRefInHook', 'useCustomerService'],
   CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
-  CustomerManagementSection: [CustomerManagementSection, 'useProps', 'useFeaturesContext'],
-} as const;
+  solveCustomerManagementSectionProps: [solveSectionProps, 'useProps', 'useFeaturesContext'],
+  CustomerManagementSection: [CustomerManagementSection, 'solveCustomerManagementSectionProps'],
+  solveCustomerManagementPageProps: [solvePageProps, 'useProps', 'useFeaturesContext'],
+});
 
-const CustomerManagementContext = createFeaturesContext(featureParams);
-
-type CustomerManagementFeatureParams = typeof featureParams;
-
-export type CustomerManagementFeatures = ConvertToFeatures<CustomerManagementFeatureParams>;
-
-export const applyCustomerManagement = <TFeature extends (...deps: any) => any>(
-  performFeature: TFeature,
-  dependencyKeys: FindPossibleDependencyKey<CustomerManagementFeatureParams, Parameters<TFeature>>
-) => applyFeaturesContext(CustomerManagementContext, performFeature, dependencyKeys);
+export const applyCustomerManagement = applyFeaturesContext.bind<null, typeof CustomerManagementContext, any, any>(
+  null,
+  CustomerManagementContext
+);
 
 export default CustomerManagementContext;

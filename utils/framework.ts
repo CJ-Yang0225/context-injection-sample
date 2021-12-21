@@ -8,8 +8,10 @@ export type BuiltInFeatureKey = keyof BuiltInFeatures;
 
 export type BuiltInFeatures<TFeatureParams extends UnknownFeatureParams = {}> = {
   useProps: () => any;
-  usePropsWithRef: () => { ref: () => React.Ref<any> };
+  usePropsWithRef: () => any & { ref: () => React.Ref<any> };
+  usePropsWithRefInHook: () => any & { ref: () => React.Ref<any> };
   useRef: () => React.Ref<any>;
+  useRefInHook: () => React.Ref<any>;
   useFeaturesContext: () => ConvertToFeatures<TFeatureParams>;
 };
 
@@ -107,22 +109,30 @@ export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams
   performFeature: TFeatureSource & { displayName?: string },
   dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>
 ) => {
-  const performAppliedFeature = (...params: any[]) => {
+  const performAppliedFeature = (props: any, ref: React.Ref<any>) => {
+    const useProps = () => ({ ...(performAppliedFeature as any).defaultProps, ...props });
+    const useRef = () => ref;
+    const useRefInHook = useRef;
+    const usePropsWithRefInHook = () => ({ ...useProps(), ref: useRef() });
+    const useFeaturesContext = () => features;
+
     const features = {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       ...useContext(FeaturesContext),
-      useProps: () => params[0],
-      useRef: () => params[1],
-      usePropsWithRef: () => ({ ...params[0], ref: params[1] }),
-      useFeaturesContext: () => features,
+      useProps,
+      useRef,
+      useRefInHook,
+      usePropsWithRefInHook,
+      useFeaturesContext,
     };
 
-    const dependencies = dependencyKeys.map((featureName) => features[featureName](...params));
+    const dependencies = dependencyKeys.map((featureName) => features[featureName](props, ref));
 
     return performFeature(...dependencies);
   };
 
   extendComponent(performAppliedFeature, performFeature);
+  delete (performAppliedFeature as any).defaultProps;
 
   /** @todo 改善 hook 判定或採用其他方式 */
   if (
