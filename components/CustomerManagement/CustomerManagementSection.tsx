@@ -21,7 +21,7 @@ const CustomerManagementSectionSelf = styled.section`
 `;
 
 CustomerManagementSection.defaultProps = {
-  Table: (props: IntrinsicElementProps<'table'>) => <table {...props} />,
+  Table: 'table',
 };
 
 export default CustomerManagementSection;

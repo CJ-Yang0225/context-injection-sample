@@ -1,25 +1,28 @@
-import { createFeaturesContext, applyFeaturesContext, FindPossibleDependencyKey } from '../../utils/framework';
+import { createFeaturesContext, applyFeaturesContext, FindPossibleDependencyKey } from '../../utils/_framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
 import CustomerTable from './CustomerTable';
 import CustomerManagementSection from './CustomerManagementSection';
+import CustomerEditPanel from './CustomerEditPanel';
 
-const solveSectionProps = (props: any, { CustomerTable }: any) => ({ Table: CustomerTable, ...props });
+const solveSectionProps = (props: any, { CustomerTable }: any) => ({ ...props, Table: CustomerTable });
 
-const solvePageProps = (props: any, { CustomerManagementSection }: any) => ({
-  Section: CustomerManagementSection,
+const solvePageProps = (props: any, { CustomerManagementSection, CustomerEditPanel }: any) => ({
   ...props,
+  Section: CustomerManagementSection,
+  EditPanel: CustomerEditPanel,
 });
 
 const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'usePropsWithRefInHook', 'useCustomerService'],
+  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService'],
   CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
   solveCustomerManagementSectionProps: [solveSectionProps, 'useProps', 'useFeaturesContext'],
   CustomerManagementSection: [CustomerManagementSection, 'solveCustomerManagementSectionProps'],
   solveCustomerManagementPageProps: [solvePageProps, 'useProps', 'useFeaturesContext'],
+  CustomerEditPanel: [CustomerEditPanel, 'useProps'],
 });
 
 export const applyCustomerManagement = applyFeaturesContext.bind<null, typeof CustomerManagementContext, any, any>(

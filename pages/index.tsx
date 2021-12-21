@@ -21,8 +21,8 @@ function CustomerManagementPage(props: CustomerManagementPageProps) {
 const CustomerManagementPageSelf = styled.div``;
 
 CustomerManagementPage.defaultProps = {
-  Section: (props: IntrinsicElementProps<'section'>) => <section {...props} />,
-  EditPanel: (props: IntrinsicElementProps<'div'>) => <div {...props} />,
+  Section: 'section',
+  EditPanel: 'div',
 };
 
 export default applyCustomerManagement(CustomerManagementPage, ['solveCustomerManagementPageProps']);
