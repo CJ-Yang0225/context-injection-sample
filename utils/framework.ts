@@ -115,57 +115,66 @@ export function createFeaturesContext<TFeatureParams extends UnknownFeatureParam
   return FeaturesContext;
 }
 
+export function useFeaturesRoot<TFeatureParams extends UnknownFeatureParams>(
+  FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
+  props: any,
+  ref?: React.Ref<any>
+): ConvertToFeatures<TFeatureParams> {
+  const propsWithRef = { ...props, ref };
+
+  const useProps = () => props;
+  const useRef = () => ref;
+  const useContext = () => features;
+  const usePropsWithRef = () => propsWithRef;
+
+  const features = {
+    ...useReactContext(FeaturesContext),
+    __featuresContextCache: {},
+    useProps,
+    useRef,
+    useContext,
+    useRefInHook: useRef,
+    usePropsWithRefInHook: usePropsWithRef,
+  };
+
+  return features;
+}
+
+export const useDependencySolver =
+  <TFeatureParams extends UnknownFeatureParams>(
+    features: ConvertToFeatures<TFeatureParams>,
+    props: any,
+    ref?: React.Ref<any>
+  ) =>
+  (dependencyKey: keyof TFeatureParams) => {
+    if (features.__featuresContextCache && dependencyKey in features.__featuresContextCache) {
+      return features.__featuresContextCache![dependencyKey];
+    }
+
+    const useDependency = features![dependencyKey];
+    const dependency = useDependency(props, ref, features);
+
+    if (features.__featuresContextCache) {
+      features.__featuresContextCache[dependencyKey] = dependency;
+    }
+
+    return dependency;
+  };
+
 export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
   featureSource: TFeatureSource & { displayName?: string },
   dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>,
   isRefNeeded: boolean = false
 ) {
-  const useFeatures = (props: any, ref: React.Ref<any>): ConvertToFeatures<TFeatureParams> => {
-    const propsWithRef = { ...props, ref };
-
-    const useProps = () => props;
-    const useRef = () => ref;
-    const useContext = () => features;
-    const usePropsWithRef = () => propsWithRef;
-
-    const features = {
-      ...useReactContext(FeaturesContext),
-      __featuresContextCache: {},
-      useProps,
-      useRef,
-      useContext,
-      useRefInHook: useRef,
-      usePropsWithRefInHook: usePropsWithRef,
-    };
-
-    return features;
-  };
-
-  function useAppliedFeature(props: any, ref: React.Ref<any>): ReturnType<TFeatureSource> {
+  function useAppliedFeature(props: any, ref?: React.Ref<any>): ReturnType<TFeatureSource> {
     var features = arguments[2] as ConvertToFeatures<TFeatureParams>;
 
     if (!features || !features.__isFeaturesContext) {
-      features = useFeatures(props, ref);
+      features = useFeaturesRoot(FeaturesContext, props, ref);
     }
 
-    const useDependencySolver = (dependencyKey: keyof TFeatureParams) => {
-      if (features.__featuresContextCache && dependencyKey in features.__featuresContextCache) {
-        return features.__featuresContextCache![dependencyKey];
-      }
-
-      const useDependency = features![dependencyKey];
-      const dependency = useDependency(props, ref, features);
-
-      if (features.__featuresContextCache) {
-        features.__featuresContextCache[dependencyKey] = dependency;
-      }
-
-      return dependency;
-    };
-
-    const dependencies = dependencyKeys.map(useDependencySolver);
-
+    const dependencies = dependencyKeys.map(useDependencySolver(features, props, ref));
     return featureSource(...dependencies);
   }
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import CustomerManagementContext, {
   applyCustomerManagement,
@@ -8,21 +8,21 @@ import CustomerManagementTemplate, {
   CustomerManagementTemplateProps,
 } from '../components/CustomerManagement/CustomerManagementTemplate';
 
+import { useDependencySolver, useFeaturesRoot } from '../utils/framework';
+
 const OverwrittenCustomerManagementTemplate = (props: CustomerManagementTemplateProps): JSX.Element => {
-  const features = useContext(CustomerManagementContext);
-  const { useCustomerService, useCustomerEditingService } = features;
-  const customerService = useCustomerService();
-  const customerEditingService = useCustomerEditingService(null, null, {
-    __isFeaturesContext: true,
-    __featuresContextCache: { useCustomerStore: customerService },
-  });
+  const features = useFeaturesRoot(CustomerManagementContext, props);
+  const { useCustomerEditingService, useCustomerService } = features;
+  const customerService = useCustomerService(props, null, features);
+  features.__featuresContextCache!['useCustomerEditingService'] = useCustomerEditingService(props, null, features);
 
   const overwrittenFeatures = {
     ...features,
-    useCustomerStore: () => customerService,
-    useCustomerService: () => customerService,
-    useCustomerEditingService: () => customerEditingService,
+    useCustomerStore: () => useDependencySolver(features, props)('useCustomerStore'),
+    useCustomerEditingService: () => useDependencySolver(features, props)('useCustomerEditingService'),
   };
+
+  console.log(overwrittenFeatures);
 
   useEffect(customerService.loadCustomers, []);
 
