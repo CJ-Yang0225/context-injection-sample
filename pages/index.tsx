@@ -25,4 +25,4 @@ CustomerManagementPage.defaultProps = {
   EditPanel: 'div',
 };
 
-export default applyCustomerManagement(CustomerManagementPage, ['solveCustomerManagementPageProps']);
+export default applyCustomerManagement(CustomerManagementPage, ['useCustomerManagementPageProps']);

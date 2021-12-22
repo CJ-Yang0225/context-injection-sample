@@ -127,8 +127,6 @@ export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParam
     }
   }
 
-  console.log(appliedFeatures);
-
   return FeaturesContext;
 };
 
@@ -156,23 +154,21 @@ export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams
     return features;
   };
 
-  const useAppliedFeature = (
-    props: any,
-    ref: React.Ref<any>,
-    features?: ConvertToFeatures<TFeatureParams>
-  ): ReturnType<TFeatureSource> => {
+  function useAppliedFeature(props: any, ref: React.Ref<any>): ReturnType<TFeatureSource> {
+    var features = arguments[2];
+
     if (!features || !features.__isFeaturesContext) {
       features = useFeatures(props, ref);
     }
 
-    const useDependencySolver = (useDependency: typeof useAppliedFeature) => useDependency(props, ref, features);
+    const useDependencySolver = (useDependency: any) => useDependency(props, ref, features);
 
     const dependencies = dependencyKeys
       .map((dependencyKey) => features![dependencyKey] as typeof useAppliedFeature)
       .map(useDependencySolver);
 
     return featureSource(...dependencies);
-  };
+  }
 
   extendComponent(useAppliedFeature as React.ElementType, featureSource);
 
