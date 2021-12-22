@@ -2,7 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 export interface CustomerManagementSectionProps {
-  Table: React.FC<IntrinsicElementProps<'table'>>;
+  Table: 'table' | React.FC<IntrinsicElementProps<'table'>>;
 }
 
 function CustomerManagementSection(props: CustomerManagementSectionProps) {

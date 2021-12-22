@@ -158,7 +158,7 @@ export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams
       const dependency = useDependency(props, ref, features);
 
       if (features.__featuresContextCache) {
-        features.__featuresContextCache[dependencyKey] = dependencyKeys;
+        features.__featuresContextCache[dependencyKey] = dependency;
       }
 
       return dependency;

@@ -12,7 +12,7 @@ const useCustomerService = (customerStore: CustomerStore): CustomerService => {
     setCustomers(
       Array(5)
         .fill(null)
-        .map((_, i) => ({ name: 'sample' + i }))
+        .map((_, i) => ({ id: i + '', name: 'sample' + i }))
     );
   }, []);
 

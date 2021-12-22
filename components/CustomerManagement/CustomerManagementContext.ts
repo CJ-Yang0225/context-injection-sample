@@ -5,6 +5,8 @@ import useCustomerTableFeature from './useCustomerTableFeature';
 import CustomerTable from './CustomerTable';
 import CustomerManagementSection from './CustomerManagementSection';
 import CustomerEditPanel from './CustomerEditPanel';
+import useCustomerEditingService from './useCustomerEditingService';
+import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
 
 const useCustomerManagementSectionProps = usePropsInjection({
   Table: 'CustomerTable',
@@ -18,12 +20,14 @@ const useCustomerManagementTemplateProps = usePropsInjection({
 const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'usePropsWithRefInHook', 'useCustomerService'],
-  CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
+  useCustomerEditingService: [useCustomerEditingService, 'useCustomerStore'],
+  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerStore', 'useCustomerEditingService'],
+  useCustomerEditPanelFeature: [useCustomerEditPanelFeature, 'useProps', 'useCustomerEditingService'],
   useCustomerManagementSectionProps: [useCustomerManagementSectionProps, 'useProps', 'useContext'],
-  CustomerManagementSection: [CustomerManagementSection, 'useCustomerManagementSectionProps'],
   useCustomerManagementTemplateProps: [useCustomerManagementTemplateProps, 'useProps', 'useContext'],
-  CustomerEditPanel: [CustomerEditPanel, 'useProps'],
+  CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
+  CustomerEditPanel: [CustomerEditPanel, 'useCustomerEditPanelFeature'],
+  CustomerManagementSection: [CustomerManagementSection, 'useCustomerManagementSectionProps'],
 });
 
 export const applyCustomerManagement = createFeaturesContextApplier(CustomerManagementContext);

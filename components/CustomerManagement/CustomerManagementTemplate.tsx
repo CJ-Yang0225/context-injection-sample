@@ -2,8 +2,8 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 export interface CustomerManagementTemplateProps {
-  Section: React.FC<IntrinsicElementProps<'section'>>;
-  EditPanel: React.FC<IntrinsicElementProps<'div'>>;
+  Section: 'section' | React.FC<IntrinsicElementProps<'section'>>;
+  EditPanel: 'div' | React.FC<IntrinsicElementProps<'div'>>;
 }
 
 function CustomerManagementTemplate(props: CustomerManagementTemplateProps) {
