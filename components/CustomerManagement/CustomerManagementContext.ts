@@ -1,4 +1,4 @@
-import { createFeaturesContext, applyFeaturesContext, FindPossibleDependencyKey } from '../../utils/_framework';
+import { createFeaturesContext, applyFeaturesContext, FindPossibleDependencyKey } from '../../utils/framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
@@ -17,11 +17,11 @@ const solvePageProps = (props: any, { CustomerManagementSection, CustomerEditPan
 const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService'],
+  useCustomerTableFeature: [useCustomerTableFeature, 'usePropsWithRefInHook', 'useCustomerService'],
   CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
-  solveCustomerManagementSectionProps: [solveSectionProps, 'useProps', 'useFeaturesContext'],
+  solveCustomerManagementSectionProps: [solveSectionProps, 'useProps', 'useContext'],
   CustomerManagementSection: [CustomerManagementSection, 'solveCustomerManagementSectionProps'],
-  solveCustomerManagementPageProps: [solvePageProps, 'useProps', 'useFeaturesContext'],
+  solveCustomerManagementPageProps: [solvePageProps, 'useProps', 'useContext'],
   CustomerEditPanel: [CustomerEditPanel, 'useProps'],
 });
 

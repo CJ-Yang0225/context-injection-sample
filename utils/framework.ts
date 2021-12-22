@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext as useReactContext } from 'react';
 
 type PrevDependencyIndexes = [-1, 0, 1, 2, 3, 4, 5, 6];
 
-type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...any[]]>;
+type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...string[]]>;
 
 export type BuiltInFeatureKey = keyof BuiltInFeatures;
 
@@ -12,7 +12,7 @@ export type BuiltInFeatures<TFeatureParams extends UnknownFeatureParams = {}> = 
   usePropsWithRefInHook: () => any & { ref: () => React.Ref<any> };
   useRef: () => React.Ref<any>;
   useRefInHook: () => React.Ref<any>;
-  useFeaturesContext: () => ConvertToFeatures<TFeatureParams>;
+  useContext: () => ConvertToFeatures<TFeatureParams>;
 };
 
 export type BuiltInDependencies<TFeatureParams extends UnknownFeatureParams = {}> = {
@@ -40,7 +40,7 @@ export type MapToDependencies<
 
 export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
   [FeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[FeatureKey][0]>;
-};
+} & { __isFeaturesContext: true };
 
 type ExtractDependencyKeys<TFeatureParamsValue extends readonly [FeatureSource, ...any[]]> =
   TFeatureParamsValue extends readonly [FeatureSource, ...infer IDependencyKeys] ? IDependencyKeys : [];
@@ -90,61 +90,101 @@ export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = 
 export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
 ): React.Context<ConvertToFeatures<TFeatureParams>> => {
-  const appliedFeatures = {} as ConvertToFeatures<TFeatureParams>;
+  const appliedFeatures = { __isFeaturesContext: true } as ConvertToFeatures<TFeatureParams>;
   const FeaturesContext = React.createContext(appliedFeatures);
 
   for (const featureKey in featureParams) {
-    const [performFeature, ...dependencyKeys] = featureParams[featureKey] as TFeatureParams[typeof featureKey];
+    const [featureSource, ...dependencyKeys] = featureParams[featureKey] as TFeatureParams[typeof featureKey];
 
-    appliedFeatures[featureKey] = dependencyKeys.length
-      ? (applyFeaturesContext as any)(FeaturesContext, performFeature, dependencyKeys)
-      : performFeature;
+    appliedFeatures[featureKey] = featureSource as any;
+
+    if (dependencyKeys.length > 0) {
+      const allDependencyKeys = [...dependencyKeys] as (keyof TFeatureParams)[];
+
+      for (const dependencyKey of allDependencyKeys) {
+        if (dependencyKey in featureParams) {
+          const [, ...dependencyKeysOfDependency] = featureParams[dependencyKey];
+
+          allDependencyKeys.push(
+            ...(dependencyKeysOfDependency as (keyof TFeatureParams)[]).filter((dependencyKey) =>
+              allDependencyKeys.every((key) => key !== dependencyKey)
+            )
+          );
+        }
+      }
+
+      const isRefNeeded =
+        ['useRef', 'usePropsWithRef', 'useRefInHook', 'usePropsWithRefInHook'].some((key) =>
+          allDependencyKeys.includes(key)
+        ) && ['useRefInHook', 'usePropsWithRefInHook'].every((key) => !dependencyKeys.includes(key));
+
+      appliedFeatures[featureKey] = (applyFeaturesContext as any)(
+        FeaturesContext,
+        featureSource,
+        dependencyKeys,
+        isRefNeeded
+      );
+    }
   }
+
+  console.log(appliedFeatures);
 
   return FeaturesContext;
 };
 
 export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
-  performFeature: TFeatureSource & { displayName?: string },
-  dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>
+  featureSource: TFeatureSource & { displayName?: string },
+  dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>,
+  isRefNeeded: boolean = false
 ) => {
-  const performAppliedFeature = (props: any, ref: React.Ref<any>) => {
-    const useProps = () => ({ ...(performAppliedFeature as any).defaultProps, ...props });
+  const useFeatures = (props: any, ref: React.Ref<any>): ConvertToFeatures<TFeatureParams> => {
+    const useProps = () => props;
     const useRef = () => ref;
-    const useRefInHook = useRef;
-    const usePropsWithRefInHook = () => ({ ...useProps(), ref: useRef() });
-    const useFeaturesContext = () => features;
+    const useContext = () => features;
+    const usePropsWithRef = () => ({ ...props, ref });
 
     const features = {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      ...useContext(FeaturesContext),
+      ...useReactContext(FeaturesContext),
       useProps,
       useRef,
-      useRefInHook,
-      usePropsWithRefInHook,
-      useFeaturesContext,
+      useContext,
+      useRefInHook: useRef,
+      usePropsWithRefInHook: usePropsWithRef,
     };
 
-    const dependencies = dependencyKeys.map((featureName) => features[featureName](props, ref));
-
-    return performFeature(...dependencies);
+    return features;
   };
 
-  extendComponent(performAppliedFeature, performFeature);
-  delete (performAppliedFeature as any).defaultProps;
+  const useAppliedFeature = (
+    props: any,
+    ref: React.Ref<any>,
+    features?: ConvertToFeatures<TFeatureParams>
+  ): ReturnType<TFeatureSource> => {
+    if (!features || !features.__isFeaturesContext) {
+      features = useFeatures(props, ref);
+    }
 
-  /** @todo 改善 hook 判定或採用其他方式 */
-  if (
-    !/^use/.test(performFeature.displayName || performFeature.name) &&
-    ((dependencyKeys as string[]).includes('useRef') || (dependencyKeys as string[]).includes('usePropsWithRef'))
-  ) {
-    const refForwardedFeature = React.forwardRef(performAppliedFeature);
-    extendComponent(refForwardedFeature, performAppliedFeature);
-    return refForwardedFeature;
+    const useDependencySolver = (useDependency: typeof useAppliedFeature) => useDependency(props, ref, features);
+
+    const dependencies = dependencyKeys
+      .map((dependencyKey) => features![dependencyKey] as typeof useAppliedFeature)
+      .map(useDependencySolver);
+
+    return featureSource(...dependencies);
+  };
+
+  extendComponent(useAppliedFeature as React.ElementType, featureSource);
+
+  if (isRefNeeded) {
+    const FeatureAppliedComponent = React.forwardRef(
+      useAppliedFeature as React.ForwardRefRenderFunction<any, Parameters<typeof useAppliedFeature>[1]>
+    );
+    extendComponent(FeatureAppliedComponent, useAppliedFeature as React.ElementType);
+    return FeatureAppliedComponent;
   }
 
-  return performAppliedFeature;
+  return useAppliedFeature;
 };
 
 /**
