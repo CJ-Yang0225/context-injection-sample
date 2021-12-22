@@ -1,10 +1,4 @@
-import {
-  createFeaturesContext,
-  applyFeaturesContext,
-  FindPossibleDependencyKey,
-  usePropsInjection,
-  GetFeatureParams,
-} from '../../utils/framework';
+import { createFeaturesContext, usePropsInjection, createFeaturesContextApplier } from '../../utils/framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
@@ -32,12 +26,6 @@ const CustomerManagementContext = createFeaturesContext({
   CustomerEditPanel: [CustomerEditPanel, 'useProps'],
 });
 
-type CustomerManagementFeatureParams = GetFeatureParams<typeof CustomerManagementContext>;
-
-export const applyCustomerManagement = <TFeatureSource extends (...args: any[]) => any>(
-  featureSource: TFeatureSource,
-  dependencyKeys: FindPossibleDependencyKey<CustomerManagementFeatureParams, Parameters<TFeatureSource>>,
-  isRefNeeded: boolean = false
-) => applyFeaturesContext(CustomerManagementContext, featureSource, dependencyKeys, isRefNeeded);
+export const applyCustomerManagement = createFeaturesContextApplier(CustomerManagementContext);
 
 export default CustomerManagementContext;

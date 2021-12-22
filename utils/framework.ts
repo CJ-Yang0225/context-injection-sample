@@ -21,26 +21,9 @@ export type BuiltInDependencies<TFeatureParams extends UnknownFeatureParams = {}
 
 type FeatureSource = (...deps: any[]) => any;
 
-type DependencyKey<TFeatureParams extends UnknownFeatureParams> = keyof TFeatureParams | BuiltInFeatureKey;
-
-export type MapToDependencies<
-  TFeatureParams extends UnknownFeatureParams,
-  TDependencyKeys extends DependencyKey<TFeatureParams>[],
-  TDependencyKeyIndex extends number = PrevDependencyIndexes[TDependencyKeys['length']]
-> = TDependencyKeyIndex extends -1
-  ? []
-  : [
-      ...MapToDependencies<TFeatureParams, TDependencyKeys, PrevDependencyIndexes[TDependencyKeyIndex]>,
-      TDependencyKeys[TDependencyKeyIndex] extends keyof TFeatureParams
-        ? ReturnType<TFeatureParams[TDependencyKeys[TDependencyKeyIndex]][0]>
-        : TDependencyKeys[TDependencyKeyIndex] extends BuiltInFeatureKey
-        ? BuiltInDependencies<TFeatureParams>[TDependencyKeys[TDependencyKeyIndex]]
-        : any
-    ];
-
 export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
   [FeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[FeatureKey][0]>;
-} & { __isFeaturesContext: true };
+} & { __isFeaturesContext: true; __featuresContextCache?: Partial<Record<keyof TFeatureParams, any>> };
 
 type ExtractDependencyKeys<TFeatureParamsValue extends readonly [FeatureSource, ...any[]]> =
   TFeatureParamsValue extends readonly [FeatureSource, ...infer IDependencyKeys] ? IDependencyKeys : [];
@@ -88,12 +71,6 @@ export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = 
         ...FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>, FeatureKey>
       ];
 };
-
-export type GetFeatureParams<TFeaturesContext extends React.Context<any>> = TFeaturesContext extends React.Context<
-  ConvertToFeatures<infer IFeatureParams>
->
-  ? IFeatureParams
-  : any;
 
 export function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
@@ -145,13 +122,16 @@ export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams
   isRefNeeded: boolean = false
 ) {
   const useFeatures = (props: any, ref: React.Ref<any>): ConvertToFeatures<TFeatureParams> => {
+    const propsWithRef = { ...props, ref };
+
     const useProps = () => props;
     const useRef = () => ref;
     const useContext = () => features;
-    const usePropsWithRef = () => ({ ...props, ref });
+    const usePropsWithRef = () => propsWithRef;
 
     const features = {
       ...useReactContext(FeaturesContext),
+      __featuresContextCache: {},
       useProps,
       useRef,
       useContext,
@@ -163,17 +143,28 @@ export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams
   };
 
   function useAppliedFeature(props: any, ref: React.Ref<any>): ReturnType<TFeatureSource> {
-    var features = arguments[2];
+    var features = arguments[2] as ConvertToFeatures<TFeatureParams>;
 
     if (!features || !features.__isFeaturesContext) {
       features = useFeatures(props, ref);
     }
 
-    const useDependencySolver = (useDependency: any) => useDependency(props, ref, features);
+    const useDependencySolver = (dependencyKey: keyof TFeatureParams) => {
+      if (features.__featuresContextCache && dependencyKey in features.__featuresContextCache) {
+        return features.__featuresContextCache![dependencyKey];
+      }
 
-    const dependencies = dependencyKeys
-      .map((dependencyKey) => features![dependencyKey] as typeof useAppliedFeature)
-      .map(useDependencySolver);
+      const useDependency = features![dependencyKey];
+      const dependency = useDependency(props, ref, features);
+
+      if (features.__featuresContextCache) {
+        features.__featuresContextCache[dependencyKey] = dependencyKeys;
+      }
+
+      return dependency;
+    };
+
+    const dependencies = dependencyKeys.map(useDependencySolver);
 
     return featureSource(...dependencies);
   }
@@ -189,6 +180,16 @@ export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams
   }
 
   return useAppliedFeature;
+}
+
+export function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParams>(
+  FeatureContext: React.Context<ConvertToFeatures<TFeatureParams>>
+) {
+  return <TFeatureSource extends (...args: any[]) => any>(
+    featureSource: TFeatureSource,
+    dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>,
+    isRefNeeded: boolean = false
+  ) => applyFeaturesContext(FeatureContext, featureSource, dependencyKeys, isRefNeeded);
 }
 
 /**
