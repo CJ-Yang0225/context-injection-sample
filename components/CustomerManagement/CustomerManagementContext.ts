@@ -2,7 +2,8 @@ import {
   createFeaturesContext,
   applyFeaturesContext,
   FindPossibleDependencyKey,
-  ConvertToFeatures,
+  usePropsInjection,
+  GetFeatureParams,
 } from '../../utils/framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
@@ -10,11 +11,6 @@ import useCustomerTableFeature from './useCustomerTableFeature';
 import CustomerTable from './CustomerTable';
 import CustomerManagementSection from './CustomerManagementSection';
 import CustomerEditPanel from './CustomerEditPanel';
-
-const usePropsInjection = (map: Record<string, string>) => (props: any, features: any) => ({
-  ...props,
-  ...Object.fromEntries(Object.entries(map).map(([targetKey, sourceKey]) => [targetKey, features[sourceKey]])),
-});
 
 const useCustomerManagementSectionProps = usePropsInjection({
   Table: 'CustomerTable',
@@ -36,11 +32,7 @@ const CustomerManagementContext = createFeaturesContext({
   CustomerEditPanel: [CustomerEditPanel, 'useProps'],
 });
 
-type CustomerManagementFeatureParams = typeof CustomerManagementContext extends React.Context<
-  ConvertToFeatures<infer IFeatureParams>
->
-  ? IFeatureParams
-  : any;
+type CustomerManagementFeatureParams = GetFeatureParams<typeof CustomerManagementContext>;
 
 export const applyCustomerManagement = <TFeatureSource extends (...args: any[]) => any>(
   featureSource: TFeatureSource,

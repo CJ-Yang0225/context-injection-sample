@@ -48,11 +48,17 @@ type ExtractDependencyKeys<TFeatureParamsValue extends readonly [FeatureSource, 
 export type FindPossibleDependencyKey<
   TFeatureParams extends UnknownFeatureParams,
   TDependencies extends any[],
+  TFeatureKey extends any = never,
   TDependencyKeyIndex extends number = PrevDependencyIndexes[TDependencies['length']]
 > = TDependencyKeyIndex extends -1
   ? []
   : [
-      ...FindPossibleDependencyKey<TFeatureParams, TDependencies, PrevDependencyIndexes[TDependencyKeyIndex]>,
+      ...FindPossibleDependencyKey<
+        TFeatureParams,
+        TDependencies,
+        TFeatureKey,
+        PrevDependencyIndexes[TDependencyKeyIndex]
+      >,
       (
         | {
             [FeatureKey in keyof TFeatureParams]: ReturnType<
@@ -60,36 +66,38 @@ export type FindPossibleDependencyKey<
             > extends TDependencies[TDependencyKeyIndex]
               ? FeatureKey
               : never;
-          }[keyof TFeatureParams]
+          }[Exclude<keyof TFeatureParams, TFeatureKey>]
         | {
             [FeatureKey in BuiltInFeatureKey]: TDependencies[TDependencyKeyIndex] extends BuiltInDependencies<TFeatureParams>[FeatureKey]
               ? FeatureKey
               : never;
-          }[BuiltInFeatureKey]
+          }[Exclude<
+            BuiltInFeatureKey,
+            TFeatureKey extends `use${string}` ? 'useRef' | 'usePropsWithRef' : 'useRefInHook' | 'usePropsWithRefInHook'
+          >]
       )
     ];
 
 export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = {}> = {
   readonly [FeatureKey in keyof TFeatureParams]: ExtractDependencyKeys<
     TFeatureParams[FeatureKey]
-  > extends DependencyKey<TFeatureParams>[]
-    ? MapToDependencies<TFeatureParams, ExtractDependencyKeys<TFeatureParams[FeatureKey]>> extends Parameters<
-        TFeatureParams[FeatureKey][0]
-      >
-      ? TFeatureParams[FeatureKey]
-      : readonly [
-          TFeatureParams[FeatureKey][0],
-          ...FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
-        ]
+  > extends FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>, FeatureKey>
+    ? TFeatureParams[FeatureKey]
     : readonly [
         TFeatureParams[FeatureKey][0],
-        ...FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>>
+        ...FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureParams[FeatureKey][0]>, FeatureKey>
       ];
 };
 
-export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParams>(
+export type GetFeatureParams<TFeaturesContext extends React.Context<any>> = TFeaturesContext extends React.Context<
+  ConvertToFeatures<infer IFeatureParams>
+>
+  ? IFeatureParams
+  : any;
+
+export function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
-): React.Context<ConvertToFeatures<TFeatureParams>> => {
+): React.Context<ConvertToFeatures<TFeatureParams>> {
   const appliedFeatures = { __isFeaturesContext: true } as ConvertToFeatures<TFeatureParams>;
   const FeaturesContext = React.createContext(appliedFeatures);
 
@@ -128,14 +136,14 @@ export const createFeaturesContext = <TFeatureParams extends UnknownFeatureParam
   }
 
   return FeaturesContext;
-};
+}
 
-export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
+export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
   featureSource: TFeatureSource & { displayName?: string },
   dependencyKeys: FindPossibleDependencyKey<TFeatureParams, Parameters<TFeatureSource>>,
   isRefNeeded: boolean = false
-) => {
+) {
   const useFeatures = (props: any, ref: React.Ref<any>): ConvertToFeatures<TFeatureParams> => {
     const useProps = () => props;
     const useRef = () => ref;
@@ -181,7 +189,7 @@ export const applyFeaturesContext = <TFeatureParams extends UnknownFeatureParams
   }
 
   return useAppliedFeature;
-};
+}
 
 /**
  * 補上額外的靜態屬性，其中將 $$typeof 與 render 排除，避免 react 判斷為其他元件 (如: forward ref) 導致失效。
@@ -195,3 +203,10 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
     (ExtendedComponent as React.ComponentType).displayName = Component.displayName || Component.name;
   }
 }
+
+export const usePropsInjection =
+  <TPropsMap extends Record<string, string>>(propsMap: TPropsMap) =>
+  (props: any, features: any): { [propName in keyof TPropsMap]: any } => ({
+    ...props,
+    ...Object.fromEntries(Object.entries(propsMap).map(([targetKey, sourceKey]) => [targetKey, features[sourceKey]])),
+  });
