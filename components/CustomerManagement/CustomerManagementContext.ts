@@ -16,7 +16,7 @@ const useCustomerManagementSectionProps = usePropsInjection({
   Table: 'CustomerTable',
 });
 
-const useCustomerManagementPageProps = usePropsInjection({
+const useCustomerManagementTemplateProps = usePropsInjection({
   Section: 'CustomerManagementSection',
   EditPanel: 'CustomerEditPanel',
 });
@@ -28,7 +28,7 @@ const CustomerManagementContext = createFeaturesContext({
   CustomerTable: [CustomerTable, 'useCustomerTableFeature'],
   useCustomerManagementSectionProps: [useCustomerManagementSectionProps, 'useProps', 'useContext'],
   CustomerManagementSection: [CustomerManagementSection, 'useCustomerManagementSectionProps'],
-  useCustomerManagementPageProps: [useCustomerManagementPageProps, 'useProps', 'useContext'],
+  useCustomerManagementTemplateProps: [useCustomerManagementTemplateProps, 'useProps', 'useContext'],
   CustomerEditPanel: [CustomerEditPanel, 'useProps'],
 });
 
