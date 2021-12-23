@@ -1,17 +1,30 @@
 import { CustomerEditPanelProps } from './CustomerEditPanel';
 import { CustomerEditingService } from './useCustomerEditingService';
+import { CustomerStore } from './useCustomerStore';
 
 const useCustomerEditPanelFeature = (
   props: CustomerEditPanelProps,
+  customerStore: CustomerStore,
   customerEditingService: CustomerEditingService
 ): CustomerEditPanelProps => {
+  const { setCustomers } = customerStore;
   const { editingCustomer, setEditingCustomer } = customerEditingService;
 
-  const handleChange = (name: keyof Customer, value: Customer[typeof name]) => {
+  const handleInputChange = (name: keyof Customer, value: Customer[typeof name]) => {
     setEditingCustomer((customer) => customer && { ...customer, [name]: value });
   };
 
-  return { ...props, data: editingCustomer, onChange: handleChange };
+  const handleButtonClick = () => {
+    if (editingCustomer) {
+      setCustomers(([...customers]) => {
+        const index = customers.findIndex((customer) => customer.id === editingCustomer.id);
+        customers[index] = editingCustomer;
+        return customers;
+      });
+    }
+  };
+
+  return { ...props, data: editingCustomer, onInputChange: handleInputChange, onButtonClick: handleButtonClick };
 };
 
 export default useCustomerEditPanelFeature;

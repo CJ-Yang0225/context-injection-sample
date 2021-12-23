@@ -140,13 +140,12 @@ export function useFeaturesRoot<TFeatureParams extends UnknownFeatureParams>(
   return features;
 }
 
-export const useDependencySolver =
-  <TFeatureParams extends UnknownFeatureParams>(
-    features: ConvertToFeatures<TFeatureParams>,
-    props: any,
-    ref?: React.Ref<any>
-  ) =>
-  (dependencyKey: keyof TFeatureParams) => {
+export function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
+  features: ConvertToFeatures<TFeatureParams>,
+  props: any,
+  ref?: React.Ref<any>
+) {
+  const useDependencySolver = (dependencyKey: keyof TFeatureParams) => {
     if (features.__featuresContextCache && dependencyKey in features.__featuresContextCache) {
       return features.__featuresContextCache![dependencyKey];
     }
@@ -160,6 +159,9 @@ export const useDependencySolver =
 
     return dependency;
   };
+
+  return useDependencySolver;
+}
 
 export function applyFeaturesContext<TFeatureParams extends UnknownFeatureParams, TFeatureSource extends FeatureSource>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
@@ -214,9 +216,11 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
   }
 }
 
-export const usePropsInjection =
-  <TPropsMap extends Record<string, string>>(propsMap: TPropsMap) =>
-  (props: any, features: any): { [propName in keyof TPropsMap]: any } => ({
+export function useFeaturePropsInjection<TPropsMap extends Record<string, string>>(propsMap: TPropsMap) {
+  const usePropsInjection = (props: any, features: any): { [propName in keyof TPropsMap]: any } => ({
     ...props,
     ...Object.fromEntries(Object.entries(propsMap).map(([targetKey, sourceKey]) => [targetKey, features[sourceKey]])),
   });
+
+  return usePropsInjection;
+}
