@@ -21,7 +21,7 @@ const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
   useCustomerEditingService: [useCustomerEditingService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerStore', 'useCustomerEditingService'],
+  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService', 'useCustomerEditingService'],
   useCustomerEditPanelFeature: [
     useCustomerEditPanelFeature,
     'useProps',

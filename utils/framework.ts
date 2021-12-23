@@ -2,7 +2,7 @@ import React, { useContext as useReactContext } from 'react';
 
 type PrevDependencyIndexes = [-1, 0, 1, 2, 3, 4, 5, 6];
 
-type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...string[]]>;
+export type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...string[]]>;
 
 export type BuiltInFeatureKey = keyof BuiltInFeatures;
 
@@ -23,7 +23,7 @@ type FeatureSource = (...deps: any[]) => any;
 
 export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
   [FeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[FeatureKey][0]>;
-} & { __isFeaturesContext: true; __featuresContextCache?: Partial<Record<keyof TFeatureParams, any>> };
+} & { __isFeaturesContext: true; __featuresContextCache: Partial<Record<keyof TFeatureParams, any>> };
 
 type ExtractDependencyKeys<TFeatureParamsValue extends readonly [FeatureSource, ...any[]]> =
   TFeatureParamsValue extends readonly [FeatureSource, ...infer IDependencyKeys] ? IDependencyKeys : [];
@@ -223,4 +223,29 @@ export function useFeaturePropsInjection<TPropsMap extends Record<string, string
   });
 
   return usePropsInjection;
+}
+
+export function shareFeaturesRoot<TFeatureParams extends UnknownFeatureParams>(
+  FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
+  Component: any,
+  dependencyKeys: (keyof TFeatureParams)[]
+) {
+  const SharedFeaturesRootComponent = (props: any, ref?: React.Ref<any>) => {
+    const features = useFeaturesRoot(FeaturesContext, props, ref);
+    const sharedFeatures = {} as ConvertToFeatures<TFeatureParams>;
+
+    for (const dependencyKey of dependencyKeys) {
+      const useDependency = features[dependencyKey];
+      const dependency = useDependency(props, ref, features);
+      features.__featuresContextCache[dependencyKey] = dependency;
+      const useSharedDependency = (() => dependency) as ConvertToFeatures<TFeatureParams>[keyof TFeatureParams];
+      sharedFeatures[dependencyKey] = useSharedDependency;
+    }
+
+    const children = React.createElement(Component);
+
+    return React.createElement(FeaturesContext.Provider, { value: { ...features, ...sharedFeatures }, children });
+  };
+
+  return SharedFeaturesRootComponent;
 }
