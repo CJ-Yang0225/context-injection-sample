@@ -16,6 +16,26 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
   }
 }
 
+export function resolveRefs<T>(refA: React.Ref<T>, refB: React.Ref<T>) {
+  return (el: T) => {
+    if (typeof refA === 'object' && refA) {
+      (refA as React.MutableRefObject<T>).current = el;
+    }
+
+    if (typeof refA === 'function') {
+      refA(el);
+    }
+
+    if (typeof refB === 'object' && refB) {
+      (refB as React.MutableRefObject<T>).current = el;
+    }
+
+    if (typeof refB === 'function') {
+      refB(el);
+    }
+  };
+}
+
 type PrevDependencyIndexes = [-1, 0, 1, 2, 3, 4, 5, 6];
 
 type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...string[]]>;
@@ -207,7 +227,7 @@ function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
       return features.__loadedDependencies![dependencyKey];
     }
 
-    const useDependency = features![dependencyKey];
+    const useDependency = features[dependencyKey];
     const dependency = useDependency(props, ref, features);
 
     if (features.__loadedDependencies) {
@@ -230,37 +250,41 @@ export function createFeaturesContextApplier<TFeatureParams extends UnknownFeatu
   ) => ReturnType<typeof applyFeaturesContext>;
 }
 
-export function useFeaturesPropsInjection<TPropsMap extends Record<string, string>>(propsMap: TPropsMap) {
+function mapFeatureProps(features: any, propsMap: string | Record<string, any> | string[]): any {
+  if (propsMap instanceof Array) {
+    return propsMap.map((propsMap) => mapFeatureProps(features, propsMap));
+  }
+
+  if (typeof propsMap === 'object') {
+    return Object.keys(propsMap).reduce(
+      (props, propKey) => ((props[propKey] = mapFeatureProps(features, propsMap[propKey])), props),
+      {} as any
+    );
+  }
+
+  return features[propsMap];
+}
+
+export function useFeaturesPropsInjection<TPropsMap extends Record<string, any>>(propsMap: TPropsMap) {
   const usePropsInjection = (props: any, features: any): Record<keyof TPropsMap, any> => {
-    props = { ...props };
-
-    for (const propKey in propsMap) {
-      const featureKey = propsMap[propKey];
-      const feature = features[featureKey];
-      props[propKey] = feature;
-    }
-
-    return props;
+    return Object.assign({ ...props }, mapFeatureProps(features, propsMap));
   };
 
   return usePropsInjection;
 }
 
-function useDependencySharer<TFeatureParams extends UnknownFeatureParams>(
+function useSharedDependencySolver<TFeatureParams extends UnknownFeatureParams>(
   features: ConvertToFeatures<TFeatureParams>,
-  sharedFeatures: ConvertToFeatures<TFeatureParams>,
   props: any,
   ref?: React.Ref<any>
 ) {
-  const useDependencySharer = (dependencyKey: keyof TFeatureParams) => {
+  const useSharedDependencySolver = (dependencyKey: keyof TFeatureParams) => {
     const useDependency = features[dependencyKey];
     const dependency = useDependency(props, ref, features);
     features.__loadedDependencies[dependencyKey] = dependency;
-    const useSharedDependency = (() => dependency) as ConvertToFeatures<TFeatureParams>[keyof TFeatureParams];
-    sharedFeatures[dependencyKey] = useSharedDependency;
   };
 
-  return useDependencySharer;
+  return useSharedDependencySolver;
 }
 
 function isValidRef(ref: any): ref is React.Ref<any> {
@@ -276,7 +300,12 @@ export function shareFeatures<TFeatureParams extends UnknownFeatureParams>(
     const features = useFeaturesRoot(FeaturesContext, props, ref);
     const sharedFeatures = {} as ConvertToFeatures<TFeatureParams>;
 
-    dependencyKeys.forEach(useDependencySharer(features, sharedFeatures, props, ref));
+    dependencyKeys.forEach(useSharedDependencySolver(features, props, ref));
+
+    for (const dependencyKey of dependencyKeys) {
+      sharedFeatures[dependencyKey] = (() =>
+        features.__loadedDependencies[dependencyKey]) as ConvertToFeatures<TFeatureParams>[keyof TFeatureParams];
+    }
 
     const children = React.createElement(Component, { ...props, ref: isValidRef(ref) ? ref : void 0 });
 

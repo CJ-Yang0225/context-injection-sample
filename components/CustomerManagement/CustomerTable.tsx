@@ -13,8 +13,8 @@ function CustomerTable(props: CustomerTableProps) {
     <CustomerTableSelf {...domProps}>
       <tbody>
         {data.map(({ id, name }, index) => (
-          <tr key={index} onClick={() => onRowSelect(id)}>
-            <td>{name}</td>
+          <tr className="CustomerTable__row" key={index} onClick={() => onRowSelect(id)}>
+            <td className="CustomerTable__column">{name}</td>
           </tr>
         ))}
       </tbody>
@@ -22,6 +22,15 @@ function CustomerTable(props: CustomerTableProps) {
   );
 }
 
-const CustomerTableSelf = styled.table``;
+const CustomerTableSelf = styled.table`
+  &.CustomerTable--bordered {
+    border-collapse: collapse;
+  }
+
+  &.CustomerTable--bordered .CustomerTable__column {
+    border-width: 1px;
+    border-style: solid;
+  }
+`;
 
 export default CustomerTable;
