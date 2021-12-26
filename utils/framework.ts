@@ -264,7 +264,7 @@ function useDependencySharer<TFeatureParams extends UnknownFeatureParams>(
 }
 
 function isValidRef(ref: any): ref is React.Ref<any> {
-  return typeof ref === 'function' || 'current' in ref;
+  return ref && (typeof ref === 'function' || 'current' in ref);
 }
 
 export function shareFeatures<TFeatureParams extends UnknownFeatureParams>(
