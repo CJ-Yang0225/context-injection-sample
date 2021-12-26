@@ -4,9 +4,9 @@ import CustomerManagementContext, {
 
 import CustomerManagementTemplate from '../components/CustomerManagement/CustomerManagementTemplate';
 
-import { shareFeaturesRoot } from '../utils/framework';
+import { shareFeatures } from '../utils/framework';
 
-export default shareFeaturesRoot(
+export default shareFeatures(
   CustomerManagementContext,
   applyCustomerManagement(CustomerManagementTemplate, ['useCustomerManagementTemplateProps']),
   ['useCustomerStore', 'useCustomerService', 'useCustomerEditingService']

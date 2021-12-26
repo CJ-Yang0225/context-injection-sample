@@ -1,4 +1,4 @@
-import { createFeaturesContext, useFeaturePropsInjection, createFeaturesContextApplier } from '../../utils/framework';
+import { createFeaturesContext, useFeaturesPropsInjection, createFeaturesContextApplier } from '../../utils/framework';
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
 import useCustomerTableFeature from './useCustomerTableFeature';
@@ -8,11 +8,11 @@ import CustomerEditPanel from './CustomerEditPanel';
 import useCustomerEditingService from './useCustomerEditingService';
 import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
 
-const useCustomerManagementSectionProps = useFeaturePropsInjection({
+const useCustomerManagementSectionProps = useFeaturesPropsInjection({
   Table: 'CustomerTable',
 });
 
-const useCustomerManagementTemplateProps = useFeaturePropsInjection({
+const useCustomerManagementTemplateProps = useFeaturesPropsInjection({
   Section: 'CustomerManagementSection',
   EditPanel: 'CustomerEditPanel',
 });
