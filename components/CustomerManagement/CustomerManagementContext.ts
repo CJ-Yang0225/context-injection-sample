@@ -9,7 +9,7 @@ import useCustomerEditingService from './useCustomerEditingService';
 import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
 
 const useCustomerManagementSectionProps = useFeaturesPropsInjection({
-  Table: 'SpecialCustomerTable',
+  Table: 'BorderedCustomerTable',
 });
 
 const useCustomerManagementTemplateProps = useFeaturesPropsInjection({
@@ -17,7 +17,7 @@ const useCustomerManagementTemplateProps = useFeaturesPropsInjection({
   EditPanel: 'CustomerEditPanel',
 });
 
-const useSpecialCustomerTableFeature = (props: CustomerTableProps) => ({
+const useBorderedCustomerTableFeature = (props: CustomerTableProps) => ({
   ...props,
   className: (props.className ? props.className.split(' ') : []).concat(['CustomerTable--bordered']).join(' '),
 });
@@ -39,8 +39,8 @@ const CustomerManagementContext = createFeaturesContext({
   CustomerEditPanel: [CustomerEditPanel, 'useCustomerEditPanelFeature'],
   CustomerManagementSection: [CustomerManagementSection, 'useCustomerManagementSectionProps'],
 
-  useSpecialCustomerTableFeature: [useSpecialCustomerTableFeature, 'useCustomerTableFeature'],
-  SpecialCustomerTable: [CustomerTable, 'useSpecialCustomerTableFeature'],
+  useBorderedCustomerTableFeature: [useBorderedCustomerTableFeature, 'useCustomerTableFeature'],
+  BorderedCustomerTable: [CustomerTable, 'useBorderedCustomerTableFeature'],
 });
 
 export const applyCustomerManagement = createFeaturesContextApplier(CustomerManagementContext);
