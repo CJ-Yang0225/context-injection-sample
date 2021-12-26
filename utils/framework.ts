@@ -252,7 +252,7 @@ function useDependencySharer<TFeatureParams extends UnknownFeatureParams>(
   props: any,
   ref?: React.Ref<any>
 ) {
-  const useSharedDependency = (dependencyKey: keyof TFeatureParams) => {
+  const useDependencySharer = (dependencyKey: keyof TFeatureParams) => {
     const useDependency = features[dependencyKey];
     const dependency = useDependency(props, ref, features);
     features.__loadedDependencies[dependencyKey] = dependency;
@@ -260,7 +260,7 @@ function useDependencySharer<TFeatureParams extends UnknownFeatureParams>(
     sharedFeatures[dependencyKey] = useSharedDependency;
   };
 
-  return useSharedDependency;
+  return useDependencySharer;
 }
 
 function isValidRef(ref: any): ref is React.Ref<any> {
