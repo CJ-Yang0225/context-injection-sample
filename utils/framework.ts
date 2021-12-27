@@ -324,14 +324,14 @@ export function createFeaturesContextSharer<TFeatureParams extends UnknownFeatur
   ) => ReturnType<typeof shareFeaturesContext>;
 }
 
-export function mergeClassName(className: string | undefined, additionalClassList: string[]) {
-  return (className ? className.split(' ') : []).concat(additionalClassList).join(' ');
+export function mergeClassName(className: string | undefined, additionalClassName: string) {
+  return className ? className + ' ' + additionalClassName : additionalClassName;
 }
 
-export function useStyleVariantProps(additionalClassList: string[]) {
+export function useStyleVariantProps(additionalClassName: string) {
   const useStyleVariantProps = (props: any) => ({
     ...props,
-    className: mergeClassName(props.className, additionalClassList),
+    className: mergeClassName(props.className, additionalClassName),
   });
 
   return useStyleVariantProps;
