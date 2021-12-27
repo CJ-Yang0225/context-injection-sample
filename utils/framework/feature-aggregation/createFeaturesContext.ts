@@ -31,7 +31,7 @@ function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
   for (const featureKey in featureParams) {
     const [featureSource, ...dependencyKeys] = featureParams[featureKey] as UnknownFeatureParams[0];
 
-    appliedFeatures[featureKey] = featureSource as any;
+    appliedFeatures[featureKey] = featureSource as typeof appliedFeatures[typeof featureKey];
 
     if (dependencyKeys.length > 0) {
       const allDependencyKeys = findAllDependencyKeys(featureParams as TFeatureParams, dependencyKeys);
@@ -42,12 +42,11 @@ function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
           allDependencyKeys.includes(key)
         );
 
-      appliedFeatures[featureKey] = (applyFeaturesContext as any)(
-        FeaturesContext,
+      appliedFeatures[featureKey] = applyFeaturesContext(
         featureSource,
-        dependencyKeys,
+        dependencyKeys as Parameters<typeof applyFeaturesContext>[1],
         isRefNeeded
-      );
+      ) as typeof appliedFeatures[typeof featureKey];
     }
   }
 

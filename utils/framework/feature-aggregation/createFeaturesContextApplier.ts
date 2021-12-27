@@ -32,7 +32,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
   const useFeaturesContext = createFeaturesContextHook(FeaturesContext);
 
   function applyFeaturesContext<TFeatureSource extends FeatureSource>(
-    featureSource: TFeatureSource & { displayName?: string },
+    useFeature: TFeatureSource,
     dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureSource>>,
     isRefNeeded: boolean = false
   ) {
@@ -46,10 +46,10 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
       }
 
       const dependencies = dependencyKeys.map(useDependencySolver(features, props, ref));
-      return featureSource(...dependencies);
+      return useFeature(...dependencies);
     }
 
-    extendComponent(useAppliedFeature as React.ElementType, featureSource);
+    extendComponent(useAppliedFeature as React.ElementType, useFeature);
 
     if (isRefNeeded) {
       const FeatureAppliedComponent = React.forwardRef(
