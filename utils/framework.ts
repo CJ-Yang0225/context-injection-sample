@@ -291,7 +291,7 @@ function isValidRef(ref: any): ref is React.Ref<any> {
   return ref && (typeof ref === 'function' || 'current' in ref);
 }
 
-export function shareFeatures<TFeatureParams extends UnknownFeatureParams>(
+export function shareFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
   FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>,
   Component: any,
   dependencyKeys: (keyof TFeatureParams)[]
@@ -315,6 +315,24 @@ export function shareFeatures<TFeatureParams extends UnknownFeatureParams>(
   return FeaturesSharedComponent;
 }
 
+export function createFeaturesContextSharer<TFeatureParams extends UnknownFeatureParams>(
+  FeatureContext: React.Context<ConvertToFeatures<TFeatureParams>>
+) {
+  return (shareFeaturesContext as any).bind(null, FeatureContext) as (
+    featureSource: any,
+    dependencyKeys: (keyof TFeatureParams)[]
+  ) => ReturnType<typeof shareFeaturesContext>;
+}
+
 export function mergeClassName(className: string | undefined, additionalClassList: string[]) {
   return (className ? className.split(' ') : []).concat(additionalClassList).join(' ');
+}
+
+export function useStyleVariantProps(additionalClassList: string[]) {
+  const useStyleVariantProps = (props: any) => ({
+    ...props,
+    className: mergeClassName(props.className, additionalClassList),
+  });
+
+  return useStyleVariantProps;
 }
