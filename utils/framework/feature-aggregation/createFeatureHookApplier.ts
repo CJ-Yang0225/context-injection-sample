@@ -1,7 +1,7 @@
 import React from 'react';
 import { extendComponent } from '../component';
 
-export function createFeatureApplier<FH extends (props: any) => {}>(
+export function createFeatureHookApplier<FH extends (props: any) => {}>(
   useFeature: FH,
   defaultProps?: Partial<Parameters<FH>[0]>
 ) {
@@ -20,4 +20,4 @@ export function createFeatureApplier<FH extends (props: any) => {}>(
   return applyFeature;
 }
 
-export default createFeatureApplier;
+export default createFeatureHookApplier;
