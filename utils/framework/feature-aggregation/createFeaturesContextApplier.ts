@@ -27,7 +27,9 @@ function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
 }
 
 function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParams>(
-  FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>
+  FeaturesContext:
+    | React.Context<ConvertToFeatures<TFeatureParams>>
+    | (() => React.Context<ConvertToFeatures<TFeatureParams>>)
 ) {
   const useFeaturesContext = createFeaturesContextHook(FeaturesContext);
 

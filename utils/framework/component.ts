@@ -1,4 +1,5 @@
 import React from 'react';
+import { extendClassNameProps } from './props';
 
 /** 補上額外的靜態屬性(不含 `$$typeof`) */
 export function extendComponent(ExtendedComponent: React.ElementType, Component: React.ElementType) {
@@ -22,4 +23,12 @@ export function combineRefProps<E extends Element, C extends React.VFC, P = Para
   extendComponent(RefPropCombinedComponent, Component);
 
   return RefPropCombinedComponent;
+}
+
+export function modifyComponentStyle<C extends React.ElementType<any>>(Component: C, className: string) {
+  const StyleModifiedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
+    return React.createElement(Component, extendClassNameProps(className)(props));
+  };
+
+  return StyleModifiedComponent;
 }

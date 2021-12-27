@@ -1,14 +1,14 @@
 import React from 'react';
 import { extendComponent } from '../component';
 
-export function createFeatureHookApplier<FH extends (props: any) => {}>(
+function createFeatureHookApplier<FH extends (props: any) => any>(
   useFeature: FH,
   defaultProps?: Partial<Parameters<FH>[0]>
 ) {
-  function applyFeature<C extends React.VFC>(Component: C) {
+  function applyFeature<C extends React.ElementType<any>>(Component: C) {
     function FeatureAppliedComponent(props: Parameters<FH>[0]) {
       const componentProps = useFeature(props);
-      return Component(componentProps);
+      return React.createElement(Component, componentProps);
     }
 
     extendComponent(FeatureAppliedComponent, Component);

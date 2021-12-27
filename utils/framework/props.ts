@@ -2,11 +2,11 @@ export function mergeClassName(className: string | undefined, additionalClassNam
   return className ? className + ' ' + additionalClassName : additionalClassName;
 }
 
-export function addVariantClassNameProps(variantClassName: string) {
-  const addVariantClassNameProps = (props: { className?: string }) => ({
+export function extendClassNameProps<P extends { className?: string }>(variantClassName: string) {
+  const extendClassNameProps = (props: P) => ({
     ...props,
     className: mergeClassName(props.className, variantClassName),
   });
 
-  return addVariantClassNameProps;
+  return extendClassNameProps;
 }
