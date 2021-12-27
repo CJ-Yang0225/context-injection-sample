@@ -250,7 +250,7 @@ export function createFeaturesContextApplier<TFeatureParams extends UnknownFeatu
   ) => ReturnType<typeof applyFeaturesContext>;
 }
 
-function mapFeatureProps(features: any, propsMap: string | Record<string, any> | string[]): any {
+function mapFeatureProps(features: any, propsMap: string | Record<string, any> | any[]): any {
   if (propsMap instanceof Array) {
     return propsMap.map((propsMap) => mapFeatureProps(features, propsMap));
   }
@@ -313,4 +313,8 @@ export function shareFeatures<TFeatureParams extends UnknownFeatureParams>(
   };
 
   return FeaturesSharedComponent;
+}
+
+export function mergeClassName(className: string | undefined, additionalClassList: string[]) {
+  return (className ? className.split(' ') : []).concat(additionalClassList).join(' ');
 }

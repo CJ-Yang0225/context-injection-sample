@@ -19,7 +19,7 @@ const useCustomerManagementTemplateProps = useFeaturesPropsInjection({
 
 const useBorderedCustomerTableFeature = (props: CustomerTableProps) => ({
   ...props,
-  className: (props.className ? props.className.split(' ') : []).concat(['CustomerTable--bordered']).join(' '),
+  className: [...(props.className ? props.className.split(' ') : []), 'CustomerTable--bordered'].join(' '),
 });
 
 const CustomerManagementContext = createFeaturesContext({
