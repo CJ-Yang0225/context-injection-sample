@@ -1,7 +1,6 @@
 import React from 'react';
 import { extendComponent } from '../component';
 import { ConvertToFeatures, FeatureSource, FindPossibleDependencyKeys, UnknownFeatureParams } from './type';
-import useFeaturesContextRoot from './createFeaturesContextHook';
 import createFeaturesContextHook from './createFeaturesContextHook';
 
 function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
