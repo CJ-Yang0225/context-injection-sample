@@ -12,6 +12,7 @@ import createFeaturesContextApplier from '../../utils/framework/feature-aggregat
 import { modifyComponentStyle } from '../../utils/framework/component';
 import createFeatureHookApplier from '../../utils/framework/feature-aggregation/createFeatureHookApplier';
 import { FeatureSource } from '../../utils/framework/feature-aggregation/type';
+import createFeaturesContextSharer from '../../utils/framework/feature-aggregation/createFeaturesContextSharer';
 
 const useCustomerManagementSectionProps = createFeaturesContextInjectionHook({
   Table: 'BorderedCustomerTable',
@@ -55,5 +56,7 @@ const CustomerManagementContext = createFeaturesContext({
 });
 
 export const applyCustomerManagement = createFeaturesContextApplier(CustomerManagementContext);
+
+export const shareCustomerManagement = createFeaturesContextSharer(CustomerManagementContext);
 
 export default CustomerManagementContext;
