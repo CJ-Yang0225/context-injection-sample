@@ -30,5 +30,7 @@ export function modifyComponentStyle<C extends React.ElementType<any>>(Component
     return React.createElement(Component, extendClassNameProps(className)(props));
   };
 
+  extendComponent(StyleModifiedComponent, Component);
+
   return StyleModifiedComponent;
 }
