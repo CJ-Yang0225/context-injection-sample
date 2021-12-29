@@ -21,7 +21,7 @@ const CustomerManagementTemplateSelf = styled.main``;
 
 CustomerManagementTemplate.defaultProps = {
   Section: 'section',
-  EditPanel: React.createElement.bind(React, 'div'),
+  EditPanel: 'div',
 };
 
 export default CustomerManagementTemplate;
