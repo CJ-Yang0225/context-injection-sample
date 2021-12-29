@@ -43,10 +43,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
       ref?: React.Ref<any>,
       features?: ConvertToFeatures<TFeatureParams>
     ): ReturnType<TFeatureSource> {
-      if (!features || !features.__isFeaturesRoot) {
-        features = useFeaturesContext(props, ref);
-      }
-
+      features = features?.__isFeaturesRoot ? features : useFeaturesContext(props, ref);
       const dependencies = dependencyKeys.map(useDependencySolver(features, props, ref));
       return useFeature(...dependencies);
     }
