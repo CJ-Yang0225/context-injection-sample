@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 
-export interface CustomerManagementTemplateProps {
+export interface CustomerManagementTemplateProps extends IntrinsicElementProps<'main'> {
   Section: 'section' | React.FC<IntrinsicElementProps<'section'>>;
   EditPanel: 'div' | React.FC<IntrinsicElementProps<'div'>>;
 }
@@ -17,7 +17,7 @@ function CustomerManagementTemplate(props: CustomerManagementTemplateProps) {
   );
 }
 
-const CustomerManagementTemplateSelf = styled.div``;
+const CustomerManagementTemplateSelf = styled.main``;
 
 CustomerManagementTemplate.defaultProps = {
   Section: 'section',
