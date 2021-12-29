@@ -5,7 +5,7 @@ function createFeatureHookApplier<FH extends (props: any) => any>(
   useFeature: FH,
   defaultProps?: Partial<Parameters<FH>[0]>
 ) {
-  function applyFeature<C extends React.VFC>(Component: C) {
+  function applyFeature<C extends React.VFC<any>>(Component: C) {
     function FeatureAppliedComponent(props: Parameters<FH>[0]) {
       const componentProps = useFeature(props);
       return Component(componentProps);

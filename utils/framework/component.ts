@@ -17,7 +17,7 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
   }
 }
 
-export function combineRefProps<E extends Element, C extends React.VFC, P = Parameters<C>[0]>(Component: C) {
+export function combineRefProps<E extends Element, C extends React.VFC<any>, P = Parameters<C>[0]>(Component: C) {
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }));
 
   extendComponent(RefPropCombinedComponent, Component);
@@ -25,7 +25,7 @@ export function combineRefProps<E extends Element, C extends React.VFC, P = Para
   return RefPropCombinedComponent;
 }
 
-export function modifyComponentStyle<C extends React.VFC>(Component: C, className: string) {
+export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, className: string) {
   const StyleModifiedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
     return Component(extendClassNameProps(className)(props));
   };
