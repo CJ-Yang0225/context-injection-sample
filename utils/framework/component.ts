@@ -34,3 +34,13 @@ export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, cla
 
   return StyleModifiedComponent;
 }
+
+export function applyFastRefresh<C extends React.VFC<any>>(Component: C) {
+  const FastRefreshAppliedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
+    return React.createElement(Component, props);
+  };
+
+  extendComponent(FastRefreshAppliedComponent, Component);
+
+  return FastRefreshAppliedComponent;
+}
