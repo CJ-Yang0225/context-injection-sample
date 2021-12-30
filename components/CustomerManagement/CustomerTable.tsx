@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { applyFastRefresh, combineRefProps } from '../../utils/framework/component';
+import { applyFastRefresh } from '../../utils/framework/component';
 
 export interface CustomerTableProps extends IntrinsicElementProps<'table'> {
   data: Customer[];
@@ -34,4 +34,4 @@ const CustomerTableSelf = styled.table`
   }
 `;
 
-export default applyFastRefresh(combineRefProps(CustomerTable));
+export default applyFastRefresh(CustomerTable);
