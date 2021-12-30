@@ -21,30 +21,30 @@ export function combineRefProps<E extends Element, C extends React.VFC<any>, P =
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }));
 
   extendComponent(RefPropCombinedComponent, Component);
-  RefPropCombinedComponent.displayName = `RefPropCombined(${RefPropCombinedComponent})`;
+  RefPropCombinedComponent.displayName = `RefPropCombined(${RefPropCombinedComponent.displayName})`;
 
   return RefPropCombinedComponent;
 }
 
 export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, className: string) {
-  const StyleModifiedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
+  const StyleModifiedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
     return Component(extendClassNameProps(className)(props));
   };
 
   extendComponent(StyleModifiedComponent, Component);
-  StyleModifiedComponent.displayName = `StyleModified(${StyleModifiedComponent})`;
+  StyleModifiedComponent.displayName = `StyleModified(${StyleModifiedComponent.displayName})`;
 
   return StyleModifiedComponent;
 }
 
 /** 針對 next.js 的 fast refresh 設計 */
 export function applyFastRefresh<C extends React.VFC<any>>(Component: C) {
-  const FastRefreshAppliedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
+  const FastRefreshAppliedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
     return React.createElement(Component, props);
   };
 
   extendComponent(FastRefreshAppliedComponent, Component);
-  FastRefreshAppliedComponent.displayName = `FastRefreshApplied(${FastRefreshAppliedComponent})`;
+  FastRefreshAppliedComponent.displayName = `FastRefreshApplied(${FastRefreshAppliedComponent.displayName})`;
 
   return FastRefreshAppliedComponent;
 }
