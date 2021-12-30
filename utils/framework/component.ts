@@ -35,6 +35,7 @@ export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, cla
   return StyleModifiedComponent;
 }
 
+/** 針對 next.js 的 fast refresh 設計 */
 export function applyFastRefresh<C extends React.VFC<any>>(Component: C) {
   const FastRefreshAppliedComponent = (props: C extends React.ElementType<infer P> ? P : any) => {
     return React.createElement(Component, props);
