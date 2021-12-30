@@ -21,6 +21,7 @@ export function combineRefProps<E extends Element, C extends React.VFC<any>, P =
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }));
 
   extendComponent(RefPropCombinedComponent, Component);
+  RefPropCombinedComponent.displayName = `RefPropCombined(${RefPropCombinedComponent})`;
 
   return RefPropCombinedComponent;
 }
@@ -31,6 +32,7 @@ export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, cla
   };
 
   extendComponent(StyleModifiedComponent, Component);
+  StyleModifiedComponent.displayName = `StyleModified(${StyleModifiedComponent})`;
 
   return StyleModifiedComponent;
 }
@@ -42,6 +44,7 @@ export function applyFastRefresh<C extends React.VFC<any>>(Component: C) {
   };
 
   extendComponent(FastRefreshAppliedComponent, Component);
+  FastRefreshAppliedComponent.displayName = `FastRefreshApplied(${FastRefreshAppliedComponent})`;
 
   return FastRefreshAppliedComponent;
 }
