@@ -28,7 +28,7 @@ export function combineRefProps<E extends Element, C extends React.VFC<any>, P =
 
 export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, className: string) {
   const StyleModifiedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
-    return Component(extendClassNameProps(className)(props));
+    return React.createElement(Component, extendClassNameProps(className)(props));
   };
 
   extendComponent(StyleModifiedComponent, Component);

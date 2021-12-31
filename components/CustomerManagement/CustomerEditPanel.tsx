@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { applyFastRefresh } from '../../utils/framework/component';
 
 export interface CustomerEditPanelProps extends IntrinsicElementProps<'div'> {
   data: Customer | null;

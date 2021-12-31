@@ -1,7 +1,12 @@
 import React from 'react';
-import { extendComponent } from '../component';
+import { combineRefProps, extendComponent } from '../component';
 import { ConvertToFeatures, FeatureSource, FindPossibleDependencyKeys, UnknownFeatureParams } from './type';
 import createFeaturesContextHook from './createFeaturesContextHook';
+
+export interface FeaturesContextApplyOptions {
+  isRefNeeded?: boolean;
+  isComponent?: boolean;
+}
 
 function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
   features: ConvertToFeatures<TFeatureParams>,
@@ -36,8 +41,24 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
   function applyFeaturesContext<TFeatureSource extends FeatureSource>(
     useFeature: TFeatureSource,
     dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureSource>>,
-    isRefNeeded: boolean = false
+    options: FeaturesContextApplyOptions = {}
   ) {
+    if (options.isComponent) {
+      let FeatureComponent: any = useFeature;
+
+      if (options.isRefNeeded) {
+        FeatureComponent = combineRefProps(useFeature);
+        extendComponent(FeatureComponent, useFeature);
+      }
+
+      useFeature = ((props: Parameters<typeof useFeature>[0]) =>
+        React.createElement(FeatureComponent, props)) as unknown as typeof useFeature;
+
+      Object.assign(useFeature, {
+        displayName: 'FeaturesContextApplied(' + (FeatureComponent.displayName || FeatureComponent.name) + ')',
+      });
+    }
+
     function useAppliedFeature(
       props: any,
       ref?: React.Ref<any>,
@@ -50,7 +71,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
 
     extendComponent(useAppliedFeature as React.ElementType, useFeature);
 
-    if (isRefNeeded) {
+    if (options.isRefNeeded) {
       const FeatureAppliedComponent = React.forwardRef(
         useAppliedFeature as React.ForwardRefRenderFunction<any, Parameters<typeof useAppliedFeature>[1]>
       );

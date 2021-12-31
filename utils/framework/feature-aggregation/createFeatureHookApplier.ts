@@ -13,6 +13,7 @@ function createFeatureHookApplier<FH extends (props: any) => any>(
 
     extendComponent(FeatureAppliedComponent, Component);
     FeatureAppliedComponent.defaultProps = defaultProps;
+    FeatureAppliedComponent.displayName = 'FeatureHookApplied(' + (Component.displayName || Component.name) + ')';
 
     return FeatureAppliedComponent;
   }
