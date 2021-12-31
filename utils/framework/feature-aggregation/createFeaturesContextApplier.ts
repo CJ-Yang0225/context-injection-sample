@@ -55,7 +55,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
         React.createElement(FeatureComponent, props)) as unknown as typeof useFeature;
 
       Object.assign(useFeature, {
-        displayName: 'FeaturesContextApplied(' + (FeatureComponent.displayName || FeatureComponent.name) + ')',
+        displayName: 'FastRefreshSolved(' + (FeatureComponent.displayName || FeatureComponent.name) + ')',
       });
     }
 

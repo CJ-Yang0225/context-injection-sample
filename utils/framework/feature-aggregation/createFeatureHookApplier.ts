@@ -8,7 +8,7 @@ function createFeatureHookApplier<FH extends (props: any) => any>(
   function applyFeature<C extends React.VFC<any>>(Component: C) {
     function FeatureAppliedComponent(props: Parameters<FH>[0]) {
       const componentProps = useFeature(props);
-      return Component(componentProps);
+      return React.createElement(Component, componentProps);
     }
 
     extendComponent(FeatureAppliedComponent, Component);
