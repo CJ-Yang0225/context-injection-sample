@@ -9,7 +9,7 @@ import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
 import createFeaturesContextInjectionHook from '../../utils/framework/feature-aggregation/createFeaturesContextInjectionHook';
 import createFeaturesContext from '../../utils/framework/feature-aggregation/createFeaturesContext';
 import createFeaturesContextApplier from '../../utils/framework/feature-aggregation/createFeaturesContextApplier';
-import { modifyComponentStyle } from '../../utils/framework/component';
+import { combineRefProps, modifyComponentStyle } from '../../utils/framework/component';
 import createFeatureHookApplier from '../../utils/framework/feature-aggregation/createFeatureHookApplier';
 import { FeatureSource } from '../../utils/framework/feature-aggregation/type';
 import createFeaturesContextSharer from '../../utils/framework/feature-aggregation/createFeaturesContextSharer';
@@ -23,7 +23,7 @@ const useCustomerManagementTemplateProps = createFeaturesContextInjectionHook({
   EditPanel: 'FeatureAppliedCustomerEditPanel',
 });
 
-const BorderedCustomerTable = modifyComponentStyle(CustomerTable, 'CustomerTable--bordered');
+const BorderedCustomerTable = modifyComponentStyle(combineRefProps(CustomerTable), 'CustomerTable--bordered');
 
 const useInjectedCustomerEditPanelFeature = createFeaturesContextApplier(() => CustomerManagementContext)(
   useCustomerEditPanelFeature,
@@ -38,7 +38,12 @@ const CustomerManagementContext = createFeaturesContext({ componentKeyRegExp: /^
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
   useCustomerEditingService: [useCustomerEditingService, 'useCustomerStore'],
-  useCustomerTableFeature: [useCustomerTableFeature, 'useProps', 'useCustomerService', 'useCustomerEditingService'],
+  useCustomerTableFeature: [
+    useCustomerTableFeature,
+    'usePropsWithRefInHook',
+    'useCustomerService',
+    'useCustomerEditingService',
+  ],
   useCustomerEditPanelFeature: [
     useCustomerEditPanelFeature,
     'useProps',

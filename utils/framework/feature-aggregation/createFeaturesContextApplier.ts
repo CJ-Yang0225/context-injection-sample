@@ -72,12 +72,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
     extendComponent(useAppliedFeature as React.ElementType, useFeature);
 
     if (options.isRefNeeded) {
-      const FeatureAppliedComponent = React.forwardRef(
-        useAppliedFeature as React.ForwardRefRenderFunction<any, Parameters<typeof useAppliedFeature>[1]>
-      );
-
-      extendComponent(FeatureAppliedComponent, useAppliedFeature as React.ElementType);
-      return FeatureAppliedComponent;
+      return combineRefProps(useAppliedFeature);
     }
 
     return useAppliedFeature;
