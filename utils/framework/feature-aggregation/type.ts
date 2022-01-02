@@ -1,3 +1,5 @@
+import React from 'react';
+
 type PrevDependencyIndexes = [-1, 0, 1, 2, 3, 4, 5, 6];
 
 export type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...string[]]>;
@@ -5,9 +7,7 @@ export type UnknownFeatureParams = Record<string, readonly [FeatureSource, ...st
 export type BuiltInFeatures<TFeatureParams extends UnknownFeatureParams = {}> = {
   useProps: () => any;
   usePropsWithRef: () => any & { ref: () => React.Ref<any> };
-  usePropsWithRefInHook: () => any & { ref: () => React.Ref<any> };
   useRef: () => React.Ref<any>;
-  useRefInHook: () => React.Ref<any>;
   useContext: () => ConvertToFeatures<TFeatureParams>;
 };
 
@@ -15,10 +15,20 @@ type BuiltInDependencies<TFeatureParams extends UnknownFeatureParams = {}> = {
   [PFeatureKey in keyof BuiltInFeatures]: ReturnType<BuiltInFeatures<TFeatureParams>[PFeatureKey]>;
 };
 
-export type FeatureSource = { (...deps: any[]): any };
+export type DependencyParamsType<TFeatureSource extends FeatureSource> = TFeatureSource extends {
+  (...deps: any[]): any;
+}
+  ? Parameters<TFeatureSource>
+  : [TFeatureSource extends React.ElementType<infer IProps> | React.ExoticComponent<infer IProps> ? IProps : any];
+
+export type DependencyType<TFeatureSource extends FeatureSource> = TFeatureSource extends { (...deps: any[]): any }
+  ? ReturnType<TFeatureSource>
+  : React.ReactElement;
+
+export type FeatureSource = { (...deps: any[]): any } | React.ElementType<any> | React.ExoticComponent<any>;
 
 export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
-  [PFeatureKey in keyof TFeatureParams]: (...args: any[]) => ReturnType<TFeatureParams[PFeatureKey][0]>;
+  [PFeatureKey in keyof TFeatureParams]: (...args: any[]) => DependencyType<TFeatureParams[PFeatureKey][0]>;
 } & { __isFeaturesRoot: true; __loadedDependencies: Partial<Record<keyof TFeatureParams, any>> };
 
 type ExtractDependencyKeys<TFeatureParamsValue extends readonly [FeatureSource, ...any[]]> =
@@ -40,7 +50,7 @@ export type FindPossibleDependencyKeys<
       >,
       (
         | {
-            [PFeatureKey in keyof TFeatureParams]: ReturnType<
+            [PFeatureKey in keyof TFeatureParams]: DependencyType<
               TFeatureParams[PFeatureKey][0]
             > extends TDependencies[TDependencyKeyIndex]
               ? PFeatureKey
@@ -50,20 +60,21 @@ export type FindPossibleDependencyKeys<
             [PFeatureKey in keyof BuiltInFeatures]: TDependencies[TDependencyKeyIndex] extends BuiltInDependencies<TFeatureParams>[PFeatureKey]
               ? PFeatureKey
               : never;
-          }[Exclude<
-            keyof BuiltInFeatures,
-            TFeatureKey extends `use${string}` ? 'useRef' | 'usePropsWithRef' : 'useRefInHook' | 'usePropsWithRefInHook'
-          >]
+          }[keyof BuiltInFeatures]
       )
     ];
 
 export type RestrictFeatureParams<TFeatureParams extends UnknownFeatureParams = {}> = {
   readonly [PFeatureKey in keyof TFeatureParams]: ExtractDependencyKeys<
     TFeatureParams[PFeatureKey]
-  > extends FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[PFeatureKey][0]>, PFeatureKey>
+  > extends FindPossibleDependencyKeys<
+    TFeatureParams,
+    DependencyParamsType<TFeatureParams[PFeatureKey][0]>,
+    PFeatureKey
+  >
     ? TFeatureParams[PFeatureKey]
     : readonly [
         TFeatureParams[PFeatureKey][0],
-        ...FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureParams[PFeatureKey][0]>, PFeatureKey>
+        ...FindPossibleDependencyKeys<TFeatureParams, DependencyParamsType<TFeatureParams[PFeatureKey][0]>, PFeatureKey>
       ];
 };

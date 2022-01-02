@@ -17,7 +17,11 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
   }
 }
 
-export function combineRefProps<E extends Element, C extends React.VFC<any>, P = Parameters<C>[0]>(Component: C) {
+export function combineRefProps<
+  E extends Element,
+  C extends React.VFC<P>,
+  P = C extends React.VFC<infer IP> ? IP : any
+>(Component: C) {
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }, ref));
 
   extendComponent(RefPropCombinedComponent, Component);
@@ -26,7 +30,7 @@ export function combineRefProps<E extends Element, C extends React.VFC<any>, P =
   return RefPropCombinedComponent;
 }
 
-export function modifyComponentStyle<C extends React.VFC<any>>(Component: C, className: string) {
+export function modifyComponentStyle<C extends React.ElementType<any>>(Component: C, className: string) {
   const StyleModifiedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
     return React.createElement(Component, extendClassNameProps(className)(props));
   };

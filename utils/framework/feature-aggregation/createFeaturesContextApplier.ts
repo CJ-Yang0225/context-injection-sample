@@ -1,6 +1,13 @@
 import React from 'react';
 import { combineRefProps, extendComponent } from '../component';
-import { ConvertToFeatures, FeatureSource, FindPossibleDependencyKeys, UnknownFeatureParams } from './type';
+import {
+  ConvertToFeatures,
+  DependencyParamsType,
+  DependencyType,
+  FeatureSource,
+  FindPossibleDependencyKeys,
+  UnknownFeatureParams,
+} from './type';
 import createFeaturesContextHook from './createFeaturesContextHook';
 
 export interface FeaturesContextApplyOptions {
@@ -40,40 +47,38 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
 
   function applyFeaturesContext<TFeatureSource extends FeatureSource>(
     useFeature: TFeatureSource,
-    dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, Parameters<TFeatureSource>>,
+    dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, DependencyParamsType<TFeatureSource>>,
     options: FeaturesContextApplyOptions = {}
   ) {
-    if (options.isComponent) {
-      let FeatureComponent: any = useFeature;
+    if (options.isComponent || typeof useFeature !== 'function') {
+      const FeatureComponent: any = useFeature;
+      const renderFeatureComponent = (props: any) => React.createElement(FeatureComponent, props);
+      useFeature = renderFeatureComponent as TFeatureSource;
 
-      if (options.isRefNeeded) {
-        FeatureComponent = combineRefProps(useFeature);
-        extendComponent(FeatureComponent, useFeature);
-      }
-
-      useFeature = ((props: Parameters<typeof useFeature>[0]) =>
-        React.createElement(FeatureComponent, props)) as unknown as typeof useFeature;
-
-      Object.assign(useFeature, {
-        displayName: 'FastRefreshSolved(' + (FeatureComponent.displayName || FeatureComponent.name) + ')',
-      });
+      extendComponent(useFeature, FeatureComponent);
     }
 
     function useAppliedFeature(
       props: any,
       ref?: React.Ref<any>,
       features?: ConvertToFeatures<TFeatureParams>
-    ): ReturnType<TFeatureSource> {
+    ): DependencyType<TFeatureSource> {
       features = features?.__isFeaturesRoot ? features : useFeaturesContext(props, ref);
       const dependencies = dependencyKeys.map(useDependencySolver(features, props, ref));
-      return useFeature(...dependencies);
+      return (useFeature as (...args: any[]) => any)(...dependencies);
     }
 
     extendComponent(useAppliedFeature as React.ElementType, useFeature);
 
     if (options.isRefNeeded) {
-      return combineRefProps(useAppliedFeature);
+      return Object.assign(combineRefProps(useAppliedFeature), {
+        displayName: 'ApplyFeaturesContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
+      });
     }
+
+    Object.assign(useAppliedFeature, {
+      displayName: 'ApplyFeaturesContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
+    });
 
     return useAppliedFeature;
   }

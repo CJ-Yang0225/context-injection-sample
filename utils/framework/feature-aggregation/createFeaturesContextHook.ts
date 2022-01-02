@@ -23,8 +23,7 @@ function createFeaturesContextHook<TFeatureParams extends UnknownFeatureParams>(
       useProps,
       useRef,
       useContext,
-      useRefInHook: useRef,
-      usePropsWithRefInHook: usePropsWithRef,
+      usePropsWithRef,
     };
 
     return features;

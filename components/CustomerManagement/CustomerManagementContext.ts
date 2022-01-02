@@ -34,13 +34,13 @@ const applyCustomerEditPanelFeature = createFeatureHookApplier(useInjectedCustom
 
 const FeatureAppliedCustomerEditPanel = applyCustomerEditPanelFeature(CustomerEditPanel) as FeatureSource;
 
-const CustomerManagementContext = createFeaturesContext({ componentKeyRegExp: /^(?!use).+$/ })({
+const CustomerManagementContext = createFeaturesContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
   useCustomerEditingService: [useCustomerEditingService, 'useCustomerStore'],
   useCustomerTableFeature: [
     useCustomerTableFeature,
-    'usePropsWithRefInHook',
+    'usePropsWithRef',
     'useCustomerService',
     'useCustomerEditingService',
   ],
