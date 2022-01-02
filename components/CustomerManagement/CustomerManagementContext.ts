@@ -10,7 +10,7 @@ import { extendClassNameProp } from '../../utils/framework/component';
 import FeatAggr from '../../utils/framework/feature-aggregation/FeatAggr';
 
 const useCustomerManagementSectionProps = FeatAggr.createContextInjectionHook({
-  Table: 'BorderedCustomerTable',
+  Table: 'UnknownTable',
 });
 
 const useCustomerManagementTemplateProps = FeatAggr.createContextInjectionHook({
@@ -53,6 +53,7 @@ const CustomerManagementContext = FeatAggr.createContext({
 
   FeatureAppliedCustomerEditPanel: [FeatureAppliedCustomerEditPanel, 'useProps'],
   BorderedCustomerTable: [BorderedCustomerTable, 'useCustomerTableFeature'],
+  UnknownTable: ['table', 'useProps'],
 });
 
 export const applyCustomerManagement = FeatAggr.createContextApplier(CustomerManagementContext);

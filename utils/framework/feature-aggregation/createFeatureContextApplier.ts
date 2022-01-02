@@ -51,11 +51,10 @@ function createFeatureContextApplier<TFeatureParams extends UnknownFeatureParams
     options: FeatureContextApplyOptions = {}
   ) {
     if (options.isComponent || typeof useFeature !== 'function') {
-      const FeatureComponent: any = useFeature;
+      const FeatureComponent: React.ElementType<any> = useFeature;
       const renderFeatureComponent = (props: any) => React.createElement(FeatureComponent, props);
+      extendComponent(renderFeatureComponent, FeatureComponent);
       useFeature = renderFeatureComponent as TFeatureSource;
-
-      extendComponent(useFeature, FeatureComponent);
     }
 
     function useAppliedFeature(
