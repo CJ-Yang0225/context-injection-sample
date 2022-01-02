@@ -54,6 +54,8 @@ export type FindPossibleDependencyKeys<
               TFeatureParams[PFeatureKey][0]
             > extends TDependencies[TDependencyKeyIndex]
               ? PFeatureKey
+              : TDependencies[TDependencyKeyIndex] extends DependencyType<TFeatureParams[PFeatureKey][0]>
+              ? PFeatureKey
               : never;
           }[Exclude<keyof TFeatureParams, TFeatureKey>]
         | {
