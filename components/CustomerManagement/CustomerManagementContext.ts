@@ -1,13 +1,13 @@
 import useCustomerStore from './useCustomerStore';
 import useCustomerService from './useCustomerService';
-import useCustomerTableFeature from './useCustomerTableFeature';
-import CustomerTable from './CustomerTable';
-import CustomerManagementSection from './CustomerManagementSection';
-import CustomerEditPanel from './CustomerEditPanel';
 import useCustomerEditingService from './useCustomerEditingService';
+import useCustomerTableFeature from './useCustomerTableFeature';
 import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
+import CustomerTable from './CustomerTable';
+import CustomerEditPanel from './CustomerEditPanel';
+import CustomerManagementSection from './CustomerManagementSection';
 import { extendClassNameProp } from '../../utils/framework/component';
-import FeatAggr, { FeatureSource } from '../../utils/framework/feature-aggregation/FeatAggr';
+import FeatAggr from '../../utils/framework/feature-aggregation/FeatAggr';
 
 const useCustomerManagementSectionProps = FeatAggr.createContextInjectionHook({
   Table: 'BorderedCustomerTable',
@@ -27,7 +27,7 @@ const useInjectedCustomerEditPanelFeature = FeatAggr.createContextApplier(() => 
 
 const applyCustomerEditPanelFeature = FeatAggr.createHookApplier(useInjectedCustomerEditPanelFeature);
 
-const FeatureAppliedCustomerEditPanel = applyCustomerEditPanelFeature(CustomerEditPanel) as FeatureSource;
+const FeatureAppliedCustomerEditPanel: typeof CustomerEditPanel = applyCustomerEditPanelFeature(CustomerEditPanel);
 
 const CustomerManagementContext = FeatAggr.createContext({
   useCustomerStore: [useCustomerStore],
