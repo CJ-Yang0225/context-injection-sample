@@ -1,5 +1,5 @@
 import React from 'react';
-import { extendClassNameProps } from './props';
+import { addClassNameProp as addClassName } from './props';
 
 /** 補上額外的靜態屬性(不含 `$$typeof`) */
 export function extendComponent(ExtendedComponent: React.ElementType, Component: React.ElementType) {
@@ -17,26 +17,28 @@ export function extendComponent(ExtendedComponent: React.ElementType, Component:
   }
 }
 
-export function combineRefProps<
+export function combineRefProp<
   E extends Element,
-  C extends React.VFC<P>,
+  C extends React.VFC<any>,
   P = C extends React.VFC<infer IP> ? IP : any
 >(Component: C) {
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }, ref));
 
   extendComponent(RefPropCombinedComponent, Component);
-  RefPropCombinedComponent.displayName = `CombineRefProps(${Component.displayName})`;
+  RefPropCombinedComponent.displayName = `CombineRefProps(${Component.name || Component.displayName})`;
 
   return RefPropCombinedComponent;
 }
 
-export function modifyComponentStyle<C extends React.ElementType<any>>(Component: C, className: string) {
-  const StyleModifiedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
-    return React.createElement(Component, extendClassNameProps(className)(props));
+export function addClassNameProp<C extends React.ElementType<any>>(Component: C, className: string) {
+  const ClassNamePropExtendedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
+    return React.createElement(Component, addClassName(className)(props));
   };
 
-  extendComponent(StyleModifiedComponent, Component);
-  StyleModifiedComponent.displayName = `ModifyStyle(${StyleModifiedComponent.displayName})`;
+  extendComponent(ClassNamePropExtendedComponent, Component);
 
-  return StyleModifiedComponent;
+  const componentName = typeof Component === 'string' ? Component : Component.name || Component.displayName;
+  ClassNamePropExtendedComponent.displayName = `ExtendClassNameProps(${componentName})`;
+
+  return ClassNamePropExtendedComponent;
 }

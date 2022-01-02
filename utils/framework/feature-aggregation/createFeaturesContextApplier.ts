@@ -1,5 +1,5 @@
 import React from 'react';
-import { combineRefProps, extendComponent } from '../component';
+import { combineRefProp, extendComponent } from '../component';
 import {
   ConvertToFeatures,
   DependencyParamsType,
@@ -71,7 +71,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
     extendComponent(useAppliedFeature as React.ElementType, useFeature);
 
     if (options.isRefNeeded) {
-      return Object.assign(combineRefProps(useAppliedFeature), {
+      return Object.assign(combineRefProp(useAppliedFeature), {
         displayName: 'ApplyFeaturesContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
       });
     }

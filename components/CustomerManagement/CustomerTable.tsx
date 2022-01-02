@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { combineRefProp } from '../../utils/framework/component';
 
 export interface CustomerTableProps extends IntrinsicElementProps<'table'> {
   data: Customer[];
@@ -33,4 +34,4 @@ const CustomerTableSelf = styled.table`
   }
 `;
 
-export default CustomerTable;
+export default combineRefProp(CustomerTable);

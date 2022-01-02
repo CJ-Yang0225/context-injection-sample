@@ -1,11 +1,11 @@
-export function mergeClassName(className: string | undefined, additionalClassName: string) {
+export function combineClassName(className: string | undefined, additionalClassName: string) {
   return className ? className + ' ' + additionalClassName : additionalClassName;
 }
 
-export function extendClassNameProps<P extends { className?: string }>(variantClassName: string) {
-  const extendClassNameProps = (props: P) => ({
+export function addClassNameProp(variantClassName: string) {
+  const extendClassNameProps = <P extends { className?: string }>(props: P) => ({
     ...props,
-    className: mergeClassName(props.className, variantClassName),
+    className: combineClassName(props.className, variantClassName),
   });
 
   return extendClassNameProps;
