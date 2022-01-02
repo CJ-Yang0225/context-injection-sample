@@ -1,6 +1,6 @@
 import React from 'react';
 import { isValidRef } from '../ref';
-import { UnknownFeatureParams, ConvertToFeatures } from './type';
+import { UnknownFeatureParams, ConvertToFeatures } from './types';
 import createFeatureContextHook from './createFeatureContextHook';
 
 function useSharedDependencySolver<TFeatureParams extends UnknownFeatureParams>(

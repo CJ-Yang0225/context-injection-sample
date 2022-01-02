@@ -1,6 +1,6 @@
 import React from 'react';
 import createFeatureContextApplier from './createFeatureContextApplier';
-import { BuiltInFeatures, ConvertToFeatures, RestrictFeatureParams, UnknownFeatureParams } from './type';
+import { BuiltInFeatures, ConvertToFeatures, RestrictFeatureParams, UnknownFeatureParams } from './types';
 
 function findAllDependencyKeys<TFeatureParams extends UnknownFeatureParams>(
   featureParams: TFeatureParams,

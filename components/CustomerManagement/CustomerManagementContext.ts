@@ -6,35 +6,30 @@ import CustomerManagementSection from './CustomerManagementSection';
 import CustomerEditPanel from './CustomerEditPanel';
 import useCustomerEditingService from './useCustomerEditingService';
 import useCustomerEditPanelFeature from './useCustomerEditPanelFeature';
-import createFeatureContextInjectionHook from '../../utils/framework/feature-aggregation/createFeatureContextInjectionHook';
-import createFeatureContext from '../../utils/framework/feature-aggregation/createFeatureContext';
-import createFeatureContextApplier from '../../utils/framework/feature-aggregation/createFeatureContextApplier';
-import { addClassNameProp } from '../../utils/framework/component';
-import createFeatureHookApplier from '../../utils/framework/feature-aggregation/createFeatureHookApplier';
-import { FeatureSource } from '../../utils/framework/feature-aggregation/type';
-import createFeatureContextSharer from '../../utils/framework/feature-aggregation/createFeatureContextSharer';
+import { extendClassNameProp } from '../../utils/framework/component';
+import FeatAggr, { FeatureSource } from '../../utils/framework/feature-aggregation/FeatAggr';
 
-const useCustomerManagementSectionProps = createFeatureContextInjectionHook({
+const useCustomerManagementSectionProps = FeatAggr.createContextInjectionHook({
   Table: 'BorderedCustomerTable',
 });
 
-const useCustomerManagementTemplateProps = createFeatureContextInjectionHook({
+const useCustomerManagementTemplateProps = FeatAggr.createContextInjectionHook({
   Section: 'CustomerManagementSection',
   EditPanel: 'FeatureAppliedCustomerEditPanel',
 });
 
-const BorderedCustomerTable = addClassNameProp(CustomerTable, 'CustomerTable--bordered');
+const BorderedCustomerTable = extendClassNameProp(CustomerTable, 'CustomerTable--bordered');
 
-const useInjectedCustomerEditPanelFeature = createFeatureContextApplier(() => CustomerManagementContext)(
+const useInjectedCustomerEditPanelFeature = FeatAggr.createContextApplier(() => CustomerManagementContext)(
   useCustomerEditPanelFeature,
   ['useProps', 'useCustomerStore', 'useCustomerEditingService']
 );
 
-const applyCustomerEditPanelFeature = createFeatureHookApplier(useInjectedCustomerEditPanelFeature);
+const applyCustomerEditPanelFeature = FeatAggr.createHookApplier(useInjectedCustomerEditPanelFeature);
 
 const FeatureAppliedCustomerEditPanel = applyCustomerEditPanelFeature(CustomerEditPanel) as FeatureSource;
 
-const CustomerManagementContext = createFeatureContext({
+const CustomerManagementContext = FeatAggr.createContext({
   useCustomerStore: [useCustomerStore],
   useCustomerService: [useCustomerService, 'useCustomerStore'],
   useCustomerEditingService: [useCustomerEditingService, 'useCustomerStore'],
@@ -60,8 +55,8 @@ const CustomerManagementContext = createFeatureContext({
   BorderedCustomerTable: [BorderedCustomerTable, 'useCustomerTableFeature'],
 });
 
-export const applyCustomerManagement = createFeatureContextApplier(CustomerManagementContext);
+export const applyCustomerManagement = FeatAggr.createContextApplier(CustomerManagementContext);
 
-export const shareCustomerManagement = createFeatureContextSharer(CustomerManagementContext);
+export const shareCustomerManagement = FeatAggr.createContextSharer(CustomerManagementContext);
 
 export default CustomerManagementContext;

@@ -5,7 +5,7 @@ import createFeatureContextHook from './createFeatureContextHook';
 import createFeatureContextInjectionHook from './createFeatureContextInjectionHook';
 import createFeatureContextSharer from './createFeatureContextSharer';
 
-export default {
+const FeatAggr = {
   createHookApplier: createFeatureHookApplier,
   createContext: createFeatureContext,
   createContextApplier: createFeatureContextApplier,
@@ -13,3 +13,7 @@ export default {
   createContextInjectionHook: createFeatureContextInjectionHook,
   createContextSharer: createFeatureContextSharer,
 };
+
+export * from './types';
+
+export default FeatAggr;

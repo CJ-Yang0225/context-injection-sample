@@ -1,5 +1,5 @@
 import React, { useContext as useReactContext } from 'react';
-import { UnknownFeatureParams, ConvertToFeatures } from './type';
+import { UnknownFeatureParams, ConvertToFeatures } from './types';
 
 function createFeatureContextHook<TFeatureParams extends UnknownFeatureParams>(
   FeatureContext:

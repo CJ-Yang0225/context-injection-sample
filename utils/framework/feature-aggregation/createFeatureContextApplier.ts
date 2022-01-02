@@ -7,7 +7,7 @@ import {
   FeatureSource,
   FindPossibleDependencyKeys,
   UnknownFeatureParams,
-} from './type';
+} from './types';
 import createFeatureContextHook from './createFeatureContextHook';
 
 export interface FeatureContextApplyOptions {

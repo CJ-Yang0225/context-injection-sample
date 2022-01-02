@@ -1,5 +1,5 @@
 import React from 'react';
-import { addClassNameProp as addClassName } from './props';
+import { extendClassNameProp as extendClassName } from './props';
 
 /** 補上額外的靜態屬性(不含 `$$typeof`) */
 export function extendComponent(ExtendedComponent: React.ElementType, Component: React.ElementType) {
@@ -25,20 +25,20 @@ export function combineRefProp<
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }, ref));
 
   extendComponent(RefPropCombinedComponent, Component);
-  RefPropCombinedComponent.displayName = `CombineRefProps(${Component.name || Component.displayName})`;
+  RefPropCombinedComponent.displayName = `CombineRefProp(${Component.name || Component.displayName})`;
 
   return RefPropCombinedComponent;
 }
 
-export function addClassNameProp<C extends React.ElementType<any>>(Component: C, className: string) {
+export function extendClassNameProp<C extends React.ElementType<any>>(Component: C, className: string) {
   const ClassNamePropExtendedComponent: React.VFC<C extends React.ElementType<infer P> ? P : any> = (props) => {
-    return React.createElement(Component, addClassName(className)(props));
+    return React.createElement(Component, extendClassName(className)(props));
   };
 
   extendComponent(ClassNamePropExtendedComponent, Component);
 
   const componentName = typeof Component === 'string' ? Component : Component.name || Component.displayName;
-  ClassNamePropExtendedComponent.displayName = `ExtendClassNameProps(${componentName})`;
+  ClassNamePropExtendedComponent.displayName = `ExtendClassNameProp(${componentName})`;
 
   return ClassNamePropExtendedComponent;
 }
