@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { CustomerService } from './useCustomerService';
 import type { CustomerTableProps } from './CustomerTable';
-import { CustomerEditingService } from './useCustomerEditingService';
+import type { CustomerEditingService } from './useCustomerEditingService';
 
 const useCustomerTableFeature = (
   props: CustomerTableProps,

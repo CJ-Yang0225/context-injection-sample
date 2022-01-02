@@ -1,5 +1,5 @@
 import React from 'react';
-import createFeaturesContextApplier from './createFeaturesContextApplier';
+import createFeatureContextApplier from './createFeatureContextApplier';
 import { BuiltInFeatures, ConvertToFeatures, RestrictFeatureParams, UnknownFeatureParams } from './type';
 
 function findAllDependencyKeys<TFeatureParams extends UnknownFeatureParams>(
@@ -21,12 +21,12 @@ function findAllDependencyKeys<TFeatureParams extends UnknownFeatureParams>(
   return allDependencyKeys;
 }
 
-function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
+function createFeatureContext<TFeatureParams extends UnknownFeatureParams>(
   featureParams: RestrictFeatureParams<TFeatureParams>
 ) {
   const appliedFeatures = {} as ConvertToFeatures<TFeatureParams>;
-  const FeaturesContext = React.createContext(appliedFeatures);
-  const applyFeaturesContext = createFeaturesContextApplier(FeaturesContext);
+  const FeatureContext = React.createContext(appliedFeatures);
+  const applyFeatureContext = createFeatureContextApplier(FeatureContext);
 
   for (const featureKey in featureParams) {
     const [featureSource, ...dependencyKeys] = featureParams[featureKey] as UnknownFeatureParams[0];
@@ -40,15 +40,15 @@ function createFeaturesContext<TFeatureParams extends UnknownFeatureParams>(
       const isRefNeeded =
         isComponent && (allDependencyKeys.includes('useRef') || allDependencyKeys.includes('usePropsWithRef'));
 
-      appliedFeatures[featureKey] = applyFeaturesContext(
+      appliedFeatures[featureKey] = applyFeatureContext(
         featureSource,
-        dependencyKeys as Parameters<typeof applyFeaturesContext>[1],
+        dependencyKeys as Parameters<typeof applyFeatureContext>[1],
         { isRefNeeded, isComponent }
       ) as typeof appliedFeatures[typeof featureKey];
     }
   }
 
-  return FeaturesContext;
+  return FeatureContext;
 }
 
-export default createFeaturesContext;
+export default createFeatureContext;

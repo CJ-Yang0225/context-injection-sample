@@ -1,6 +1,6 @@
-import { CustomerEditPanelProps } from './CustomerEditPanel';
-import { CustomerEditingService } from './useCustomerEditingService';
-import { CustomerStore } from './useCustomerStore';
+import type { CustomerEditPanelProps } from './CustomerEditPanel';
+import type { CustomerEditingService } from './useCustomerEditingService';
+import type { CustomerStore } from './useCustomerStore';
 
 const useCustomerEditPanelFeature = (
   props: CustomerEditPanelProps,

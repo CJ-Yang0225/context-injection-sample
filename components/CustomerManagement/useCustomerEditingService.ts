@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CustomerStore } from './useCustomerStore';
+import type { CustomerStore } from './useCustomerStore';
 
 export interface CustomerEditingService {
   editingCustomer: Customer | null;

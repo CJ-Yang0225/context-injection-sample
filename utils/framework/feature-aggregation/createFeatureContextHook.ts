@@ -1,14 +1,14 @@
 import React, { useContext as useReactContext } from 'react';
 import { UnknownFeatureParams, ConvertToFeatures } from './type';
 
-function createFeaturesContextHook<TFeatureParams extends UnknownFeatureParams>(
-  FeaturesContext:
+function createFeatureContextHook<TFeatureParams extends UnknownFeatureParams>(
+  FeatureContext:
     | React.Context<ConvertToFeatures<TFeatureParams>>
     | (() => React.Context<ConvertToFeatures<TFeatureParams>>)
 ) {
-  const getFeaturesContext = typeof FeaturesContext === 'function' ? FeaturesContext : () => FeaturesContext;
+  const getFeatureContext = typeof FeatureContext === 'function' ? FeatureContext : () => FeatureContext;
 
-  function useFeaturesContext(props: any, ref?: React.Ref<any>) {
+  function useFeatureContext(props: any, ref?: React.Ref<any>) {
     const propsWithRef = { ...props, ref };
 
     const useProps = () => props;
@@ -17,7 +17,7 @@ function createFeaturesContextHook<TFeatureParams extends UnknownFeatureParams>(
     const usePropsWithRef = () => propsWithRef;
 
     const features: ConvertToFeatures<TFeatureParams> = {
-      ...useReactContext(getFeaturesContext()),
+      ...useReactContext(getFeatureContext()),
       __isFeaturesRoot: true,
       __loadedDependencies: {},
       useProps,
@@ -29,7 +29,7 @@ function createFeaturesContextHook<TFeatureParams extends UnknownFeatureParams>(
     return features;
   }
 
-  return useFeaturesContext;
+  return useFeatureContext;
 }
 
-export default createFeaturesContextHook;
+export default createFeatureContextHook;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { isValidRef } from '../ref';
 import { UnknownFeatureParams, ConvertToFeatures } from './type';
-import createFeaturesContextHook from './createFeaturesContextHook';
+import createFeatureContextHook from './createFeatureContextHook';
 
 function useSharedDependencySolver<TFeatureParams extends UnknownFeatureParams>(
   features: ConvertToFeatures<TFeatureParams>,
@@ -17,14 +17,14 @@ function useSharedDependencySolver<TFeatureParams extends UnknownFeatureParams>(
   return useSharedDependencySolver;
 }
 
-function createFeaturesContextSharer<TFeatureParams extends UnknownFeatureParams>(
-  FeaturesContext: React.Context<ConvertToFeatures<TFeatureParams>>
+function createFeatureContextSharer<TFeatureParams extends UnknownFeatureParams>(
+  FeatureContext: React.Context<ConvertToFeatures<TFeatureParams>>
 ) {
-  const useFeaturesContext = createFeaturesContextHook(FeaturesContext);
+  const useFeatureContext = createFeatureContextHook(FeatureContext);
 
-  function shareFeaturesContext(Component: React.ElementType, dependencyKeys: (keyof TFeatureParams)[]) {
+  function shareFeatureContext(Component: React.ElementType, dependencyKeys: (keyof TFeatureParams)[]) {
     const FeaturesSharedComponent = (props: any, ref?: React.Ref<any>) => {
-      const features = useFeaturesContext(props, ref);
+      const features = useFeatureContext(props, ref);
       const sharedFeatures = {} as ConvertToFeatures<TFeatureParams>;
 
       dependencyKeys.forEach(useSharedDependencySolver(features, props, ref));
@@ -36,13 +36,13 @@ function createFeaturesContextSharer<TFeatureParams extends UnknownFeatureParams
 
       const children = React.createElement(Component, { ...props, ref: isValidRef(ref) ? ref : void 0 });
 
-      return React.createElement(FeaturesContext.Provider, { value: { ...features, ...sharedFeatures }, children });
+      return React.createElement(FeatureContext.Provider, { value: { ...features, ...sharedFeatures }, children });
     };
 
     return FeaturesSharedComponent;
   }
 
-  return shareFeaturesContext;
+  return shareFeatureContext;
 }
 
-export default createFeaturesContextSharer;
+export default createFeatureContextSharer;

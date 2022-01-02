@@ -8,9 +8,9 @@ import {
   FindPossibleDependencyKeys,
   UnknownFeatureParams,
 } from './type';
-import createFeaturesContextHook from './createFeaturesContextHook';
+import createFeatureContextHook from './createFeatureContextHook';
 
-export interface FeaturesContextApplyOptions {
+export interface FeatureContextApplyOptions {
   isRefNeeded?: boolean;
   isComponent?: boolean;
 }
@@ -38,17 +38,17 @@ function useDependencySolver<TFeatureParams extends UnknownFeatureParams>(
   return useDependencySolver;
 }
 
-function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParams>(
-  FeaturesContext:
+function createFeatureContextApplier<TFeatureParams extends UnknownFeatureParams>(
+  FeatureContext:
     | React.Context<ConvertToFeatures<TFeatureParams>>
     | (() => React.Context<ConvertToFeatures<TFeatureParams>>)
 ) {
-  const useFeaturesContext = createFeaturesContextHook(FeaturesContext);
+  const useFeatureContext = createFeatureContextHook(FeatureContext);
 
-  function applyFeaturesContext<TFeatureSource extends FeatureSource>(
+  function applyFeatureContext<TFeatureSource extends FeatureSource>(
     useFeature: TFeatureSource,
     dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, DependencyParamsType<TFeatureSource>>,
-    options: FeaturesContextApplyOptions = {}
+    options: FeatureContextApplyOptions = {}
   ) {
     if (options.isComponent || typeof useFeature !== 'function') {
       const FeatureComponent: any = useFeature;
@@ -63,7 +63,7 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
       ref?: React.Ref<any>,
       features?: ConvertToFeatures<TFeatureParams>
     ): DependencyType<TFeatureSource> {
-      features = features?.__isFeaturesRoot ? features : useFeaturesContext(props, ref);
+      features = features?.__isFeaturesRoot ? features : useFeatureContext(props, ref);
       const dependencies = dependencyKeys.map(useDependencySolver(features, props, ref));
       return (useFeature as (...args: any[]) => any)(...dependencies);
     }
@@ -72,18 +72,18 @@ function createFeaturesContextApplier<TFeatureParams extends UnknownFeatureParam
 
     if (options.isRefNeeded) {
       return Object.assign(combineRefProp(useAppliedFeature), {
-        displayName: 'ApplyFeaturesContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
+        displayName: 'ApplyFeatureContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
       });
     }
 
     Object.assign(useAppliedFeature, {
-      displayName: 'ApplyFeaturesContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
+      displayName: 'ApplyFeatureContext(' + ((useFeature as any).displayName || (useFeature as any).name) + ')',
     });
 
     return useAppliedFeature;
   }
 
-  return applyFeaturesContext;
+  return applyFeatureContext;
 }
 
-export default createFeaturesContextApplier;
+export default createFeatureContextApplier;
