@@ -25,7 +25,7 @@ export function combineRefProps<
   const RefPropCombinedComponent = React.forwardRef<E, P>((props, ref) => Component({ ...props, ref }, ref));
 
   extendComponent(RefPropCombinedComponent, Component);
-  RefPropCombinedComponent.displayName = `RefPropCombined(${RefPropCombinedComponent.displayName})`;
+  RefPropCombinedComponent.displayName = `CombineRefProps(${Component.displayName})`;
 
   return RefPropCombinedComponent;
 }
@@ -36,7 +36,7 @@ export function modifyComponentStyle<C extends React.ElementType<any>>(Component
   };
 
   extendComponent(StyleModifiedComponent, Component);
-  StyleModifiedComponent.displayName = `StyleModified(${StyleModifiedComponent.displayName})`;
+  StyleModifiedComponent.displayName = `ModifyStyle(${StyleModifiedComponent.displayName})`;
 
   return StyleModifiedComponent;
 }
