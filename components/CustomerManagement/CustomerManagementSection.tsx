@@ -10,7 +10,7 @@ function CustomerManagementSection(props: CustomerManagementSectionProps) {
 
   return (
     <CustomerManagementSectionSelf {...domProps}>
-      <Table className="CustomerManagementSection__table" />
+      {Table && <Table className="CustomerManagementSection__table" />}
     </CustomerManagementSectionSelf>
   );
 }

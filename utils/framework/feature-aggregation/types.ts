@@ -19,13 +19,17 @@ export type DependencyParamsType<TFeatureSource extends FeatureSource> = TFeatur
   (...deps: any[]): any;
 }
   ? Parameters<TFeatureSource>
+  : TFeatureSource extends null
+  ? []
   : [TFeatureSource extends React.ElementType<infer IProps> | React.ExoticComponent<infer IProps> ? IProps : any];
 
 export type DependencyType<TFeatureSource extends FeatureSource> = TFeatureSource extends { (...deps: any[]): any }
   ? ReturnType<TFeatureSource>
+  : TFeatureSource extends null
+  ? never
   : React.ReactElement;
 
-export type FeatureSource = { (...deps: any[]): any } | React.ElementType<any> | React.ExoticComponent<any>;
+export type FeatureSource = { (...deps: any[]): any } | null | React.ElementType<any> | React.ExoticComponent<any>;
 
 export type ConvertToFeatures<TFeatureParams extends UnknownFeatureParams> = {
   [PFeatureKey in keyof TFeatureParams]: (...args: any[]) => DependencyType<TFeatureParams[PFeatureKey][0]>;

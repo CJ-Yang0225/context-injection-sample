@@ -53,7 +53,7 @@ const CustomerManagementContext = FeatAggr.createContext({
 
   FeatureAppliedCustomerEditPanel: [FeatureAppliedCustomerEditPanel, 'useProps'],
   BorderedCustomerTable: [BorderedCustomerTable, 'useCustomerTableFeature'],
-  UnknownTable: ['table', 'useProps'],
+  UnknownTable: [null],
 });
 
 export const applyCustomerManagement = FeatAggr.createContextApplier(CustomerManagementContext);

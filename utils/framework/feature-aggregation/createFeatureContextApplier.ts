@@ -45,7 +45,7 @@ function createFeatureContextApplier<TFeatureParams extends UnknownFeatureParams
 ) {
   const useFeatureContext = createFeatureContextHook(FeatureContext);
 
-  function applyFeatureContext<TFeatureSource extends FeatureSource>(
+  function applyFeatureContext<TFeatureSource extends Exclude<FeatureSource, null>>(
     useFeature: TFeatureSource,
     dependencyKeys: FindPossibleDependencyKeys<TFeatureParams, DependencyParamsType<TFeatureSource>>,
     options: FeatureContextApplyOptions = {}
