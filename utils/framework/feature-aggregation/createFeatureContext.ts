@@ -34,7 +34,7 @@ function createFeatureContext<TFeatureParams extends UnknownFeatureParams>(
 
     appliedFeatures[featureKey] = featureSource as typeof appliedFeatures[typeof featureKey];
 
-    if (dependencyKeys.length > 0) {
+    if (featureSource && dependencyKeys.length > 0) {
       const allDependencyKeys = findAllDependencyKeys(featureParams as TFeatureParams, dependencyKeys);
 
       const isRefNeeded =
